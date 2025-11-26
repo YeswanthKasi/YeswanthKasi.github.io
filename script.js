@@ -80,6 +80,60 @@ const dealsData = [
     }
 ];
 
+// Toast notification system
+function showToast(message, type = 'success') {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${type === 'success' ? '✓' : 'ℹ'}</span>
+        <span class="toast-message">${message}</span>
+    `;
+
+    // Add to document
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// Generate deal card HTML (reusable function)
+function generateDealCardHTML(deal) {
+    return `
+        <div class="deal-card" data-category="${deal.category}">
+            <div class="deal-image">
+                ${deal.icon}
+                <span class="deal-badge ${deal.badge}">${deal.discount}</span>
+            </div>
+            <div class="deal-content">
+                <span class="deal-brand">${deal.brand}</span>
+                <h3>${deal.title}</h3>
+                <p>${deal.description}</p>
+                <div class="deal-price">
+                    <span class="price-current">$${deal.currentPrice.toFixed(2)}</span>
+                    <span class="price-original">$${deal.originalPrice.toFixed(2)}</span>
+                </div>
+                <div class="deal-footer">
+                    <button class="deal-btn" onclick="handleDealClick(${deal.id})">Get Deal</button>
+                    <span class="deal-expires">⏰ ${deal.expires}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // DOM Elements
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const navLinks = document.getElementById('navLinks');
@@ -127,27 +181,7 @@ function renderDeals(filter = 'all') {
         filteredDeals = dealsData.filter(deal => deal.badge === filter);
     }
 
-    dealsGrid.innerHTML = filteredDeals.map(deal => `
-        <div class="deal-card" data-category="${deal.category}">
-            <div class="deal-image">
-                ${deal.icon}
-                <span class="deal-badge ${deal.badge}">${deal.discount}</span>
-            </div>
-            <div class="deal-content">
-                <span class="deal-brand">${deal.brand}</span>
-                <h3>${deal.title}</h3>
-                <p>${deal.description}</p>
-                <div class="deal-price">
-                    <span class="price-current">$${deal.currentPrice.toFixed(2)}</span>
-                    <span class="price-original">$${deal.originalPrice.toFixed(2)}</span>
-                </div>
-                <div class="deal-footer">
-                    <button class="deal-btn" onclick="handleDealClick(${deal.id})">Get Deal</button>
-                    <span class="deal-expires">⏰ ${deal.expires}</span>
-                </div>
-            </div>
-        </div>
-    `).join('');
+    dealsGrid.innerHTML = filteredDeals.map(generateDealCardHTML).join('');
 }
 
 // Filter deals
@@ -164,7 +198,7 @@ function handleDealClick(dealId) {
     const deal = dealsData.find(d => d.id === dealId);
     if (deal) {
         // In a real application, this would redirect to an affiliate link
-        alert(`Great choice! You're being redirected to ${deal.brand} for the "${deal.title}" deal.`);
+        showToast(`Redirecting you to ${deal.brand} for the "${deal.title}" deal!`, 'success');
     }
 }
 
@@ -174,7 +208,7 @@ if (newsletterForm) {
         e.preventDefault();
         const email = newsletterForm.querySelector('input[type="email"]').value;
         if (email) {
-            alert('Thank you for subscribing! You\'ll receive our best deals in your inbox.');
+            showToast('Thank you for subscribing! You\'ll receive our best deals in your inbox.', 'success');
             newsletterForm.reset();
         }
     });
@@ -184,7 +218,7 @@ if (newsletterForm) {
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        alert('Thank you for your message! We\'ll get back to you soon.');
+        showToast('Thank you for your message! We\'ll get back to you soon.', 'success');
         contactForm.reset();
     });
 }
@@ -210,30 +244,10 @@ document.querySelectorAll('.category-card').forEach(card => {
         // Scroll to deals section
         document.getElementById('deals').scrollIntoView({ behavior: 'smooth' });
         
-        // Filter deals by category (simplified version)
+        // Filter deals by category
         const filteredDeals = dealsData.filter(deal => deal.category === category);
         if (filteredDeals.length > 0) {
-            dealsGrid.innerHTML = filteredDeals.map(deal => `
-                <div class="deal-card" data-category="${deal.category}">
-                    <div class="deal-image">
-                        ${deal.icon}
-                        <span class="deal-badge ${deal.badge}">${deal.discount}</span>
-                    </div>
-                    <div class="deal-content">
-                        <span class="deal-brand">${deal.brand}</span>
-                        <h3>${deal.title}</h3>
-                        <p>${deal.description}</p>
-                        <div class="deal-price">
-                            <span class="price-current">$${deal.currentPrice.toFixed(2)}</span>
-                            <span class="price-original">$${deal.originalPrice.toFixed(2)}</span>
-                        </div>
-                        <div class="deal-footer">
-                            <button class="deal-btn" onclick="handleDealClick(${deal.id})">Get Deal</button>
-                            <span class="deal-expires">⏰ ${deal.expires}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            dealsGrid.innerHTML = filteredDeals.map(generateDealCardHTML).join('');
         }
         
         // Reset filter buttons

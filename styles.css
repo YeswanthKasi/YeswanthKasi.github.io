@@ -161,9 +161,9 @@ h3 {
 
 .logo-text {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .nav-links {
@@ -1052,4 +1052,56 @@ textarea:focus {
 
 .skip-link:focus {
     top: 0;
+}
+
+/* Toast Notification System */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--text-primary);
+    color: white;
+    padding: 16px 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    max-width: 400px;
+}
+
+.toast-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-notification.toast-success {
+    background: var(--success-color);
+}
+
+.toast-notification.toast-info {
+    background: var(--primary-color);
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+    .toast-notification {
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        max-width: none;
+    }
 }
