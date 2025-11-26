@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover the best deals and offers on top products. Your trusted affiliate marketing partner for savings and quality.">
+    <meta name="keywords" content="affiliate marketing, deals, discounts, offers, products, savings">
+    <title>DealHub - Your Trusted Partner for Best Deals</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <span class="logo-icon">🎯</span>
+                <span class="logo-text">DealHub</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#deals">Deals</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Discover Amazing Deals & Save Big</h1>
+                <p>Your one-stop destination for the best products at unbeatable prices. We handpick the finest deals so you don't have to search.</p>
+                <div class="hero-buttons">
+                    <a href="#deals" class="btn btn-primary">Explore Deals</a>
+                    <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">10K+</span>
+                        <span class="stat-label">Happy Customers</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Partner Brands</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">50%</span>
+                        <span class="stat-label">Avg. Savings</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-shape"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About Us</h2>
+                <p>We're passionate about helping you save money while getting the products you love</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Your Trusted Deal Partner</h3>
+                    <p>Welcome to DealHub! We're dedicated to bringing you the best deals from trusted brands across various categories. Our team works tirelessly to curate exclusive offers, discount codes, and special promotions that help you save money on your everyday purchases.</p>
+                    <p>Whether you're looking for electronics, fashion, home essentials, or lifestyle products, we've got you covered with verified deals that actually work.</p>
+                    <ul class="about-features">
+                        <li>✓ Verified and tested deals</li>
+                        <li>✓ Trusted brand partnerships</li>
+                        <li>✓ Regular updates with fresh offers</li>
+                        <li>✓ No spam, just savings</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <div class="about-card">
+                        <div class="card-icon">💰</div>
+                        <h4>Save Money</h4>
+                        <p>Average savings of 50% on all deals</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="card-icon">⭐</div>
+                        <h4>Quality Products</h4>
+                        <p>Only the best brands and items</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories" id="categories">
+        <div class="container">
+            <div class="section-header">
+                <h2>Browse Categories</h2>
+                <p>Find deals across all your favorite product categories</p>
+            </div>
+            <div class="categories-grid">
+                <div class="category-card" data-category="electronics">
+                    <div class="category-icon">📱</div>
+                    <h3>Electronics</h3>
+                    <p>Phones, Laptops, Gadgets</p>
+                    <span class="deal-count">120+ Deals</span>
+                </div>
+                <div class="category-card" data-category="fashion">
+                    <div class="category-icon">👕</div>
+                    <h3>Fashion</h3>
+                    <p>Clothing, Shoes, Accessories</p>
+                    <span class="deal-count">200+ Deals</span>
+                </div>
+                <div class="category-card" data-category="home">
+                    <div class="category-icon">🏠</div>
+                    <h3>Home & Living</h3>
+                    <p>Furniture, Decor, Appliances</p>
+                    <span class="deal-count">80+ Deals</span>
+                </div>
+                <div class="category-card" data-category="health">
+                    <div class="category-icon">💪</div>
+                    <h3>Health & Fitness</h3>
+                    <p>Supplements, Equipment, Wellness</p>
+                    <span class="deal-count">90+ Deals</span>
+                </div>
+                <div class="category-card" data-category="beauty">
+                    <div class="category-icon">💄</div>
+                    <h3>Beauty</h3>
+                    <p>Skincare, Makeup, Fragrances</p>
+                    <span class="deal-count">150+ Deals</span>
+                </div>
+                <div class="category-card" data-category="travel">
+                    <div class="category-icon">✈️</div>
+                    <h3>Travel</h3>
+                    <p>Hotels, Flights, Experiences</p>
+                    <span class="deal-count">60+ Deals</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Deals Section -->
+    <section class="deals" id="deals">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Deals</h2>
+                <p>Handpicked offers with maximum savings</p>
+            </div>
+            <div class="deals-filter">
+                <button class="filter-btn active" data-filter="all">All Deals</button>
+                <button class="filter-btn" data-filter="hot">🔥 Hot</button>
+                <button class="filter-btn" data-filter="new">✨ New</button>
+                <button class="filter-btn" data-filter="ending">⏰ Ending Soon</button>
+            </div>
+            <div class="deals-grid" id="dealsGrid">
+                <!-- Deals will be dynamically inserted here -->
+            </div>
+            <div class="deals-cta">
+                <a href="#newsletter" class="btn btn-primary">Get More Deals</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Saving money has never been easier</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">🔍</div>
+                    <h3>Browse Deals</h3>
+                    <p>Explore our curated collection of deals across multiple categories and brands.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">🎯</div>
+                    <h3>Choose Your Favorite</h3>
+                    <p>Find the perfect deal that matches your needs and preferences.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">🛒</div>
+                    <h3>Shop & Save</h3>
+                    <p>Click through to the retailer's site and enjoy your exclusive discount.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">🎉</div>
+                    <h3>Enjoy Your Savings</h3>
+                    <p>Receive your products and celebrate the money you saved!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Our Users Say</h2>
+                <p>Real experiences from real savers</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"I saved over $500 last month alone! DealHub has completely changed how I shop online. The deals are always genuine and easy to use."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SK</div>
+                        <div class="author-info">
+                            <strong>Sarah K.</strong>
+                            <span>Verified Shopper</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"The best part is that all the deals actually work! I've tried other sites before, but DealHub is by far the most reliable."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MJ</div>
+                        <div class="author-info">
+                            <strong>Michael J.</strong>
+                            <span>Verified Shopper</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Love the variety of categories! From tech to fashion, I can find great deals on everything I need. Highly recommend!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">EP</div>
+                        <div class="author-info">
+                            <strong>Emily P.</strong>
+                            <span>Verified Shopper</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter" id="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>Never Miss a Deal!</h2>
+                <p>Subscribe to our newsletter and get exclusive deals delivered straight to your inbox.</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+                <p class="newsletter-note">🔒 We respect your privacy. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Have questions or want to partner with us?</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div>
+                            <h4>Email Us</h4>
+                            <p>contact@dealhub.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div>
+                            <h4>Live Chat</h4>
+                            <p>Available 24/7</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📱</div>
+                        <div>
+                            <h4>Follow Us</h4>
+                            <div class="social-links">
+                                <a href="#" aria-label="Facebook">FB</a>
+                                <a href="#" aria-label="Twitter">TW</a>
+                                <a href="#" aria-label="Instagram">IG</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" placeholder="Your Name" required>
+                    <input type="email" placeholder="Your Email" required>
+                    <select required>
+                        <option value="">Select Subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="partnership">Partnership</option>
+                        <option value="support">Support</option>
+                        <option value="feedback">Feedback</option>
+                    </select>
+                    <textarea placeholder="Your Message" rows="4" required></textarea>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <span class="logo-icon">🎯</span>
+                        <span class="logo-text">DealHub</span>
+                    </a>
+                    <p>Your trusted partner for finding the best deals and saving money on quality products.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#deals">Deals</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="#">Electronics</a></li>
+                        <li><a href="#">Fashion</a></li>
+                        <li><a href="#">Home & Living</a></li>
+                        <li><a href="#">Health & Fitness</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 DealHub. All rights reserved.</p>
+                <p>Affiliate Disclosure: We may earn commissions from purchases made through links on this site.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
