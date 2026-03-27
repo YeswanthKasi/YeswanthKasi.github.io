@@ -320,8 +320,8 @@ if (productForm) {
             return;
         }
 
-        if (currentPrice <= 0 || originalPrice <= 0 || currentPrice > originalPrice) {
-            showToast('Enter valid prices. Current price must be less than or equal to original price.', 'info');
+        if (currentPrice <= 0 || originalPrice <= 0 || currentPrice >= originalPrice) {
+            showToast('Enter valid prices. Current price must be less than original price.', 'info');
             return;
         }
 
