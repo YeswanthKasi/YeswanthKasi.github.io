@@ -107,7 +107,7 @@ let dealsData = JSON.parse(JSON.stringify(defaultDealsData));
 let siteSettings = { ...defaultSiteSettings };
 let ownerUnlocked = false;
 let adsInitialized = false;
-let nextDealId = defaultDealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+let nextDealId = 1;
 
 const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 const navLinks = document.getElementById("navLinks");
@@ -185,8 +185,7 @@ async function hashPassword(password) {
             .map((value) => value.toString(16).padStart(2, "0"))
             .join("");
     }
-    // Legacy-browser fallback only. btoa is not cryptographically secure.
-    return btoa(password);
+    return null;
 }
 
 function normalizeDeal(raw) {
@@ -571,6 +570,10 @@ if (ownerSetupForm) {
             return;
         }
         const hash = await hashPassword(password);
+        if (!hash) {
+            showToast("Secure owner setup is not supported in this browser.", "info");
+            return;
+        }
         localStorage.setItem(storageKeys.ownerHash, hash);
         ownerSetupForm.reset();
         showToast("Owner password created successfully.", "success");
@@ -583,6 +586,10 @@ if (ownerLoginForm) {
         event.preventDefault();
         const password = ownerLoginForm.querySelector("#ownerPasswordLogin").value;
         const hash = await hashPassword(password);
+        if (!hash) {
+            showToast("Secure owner login is not supported in this browser.", "info");
+            return;
+        }
         const savedHash = localStorage.getItem(storageKeys.ownerHash);
         if (!savedHash || hash !== savedHash) {
             showToast("Invalid owner password.", "info");
