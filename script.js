@@ -107,6 +107,7 @@ let dealsData = JSON.parse(JSON.stringify(defaultDealsData));
 let siteSettings = { ...defaultSiteSettings };
 let ownerUnlocked = false;
 let adsInitialized = false;
+let nextDealId = defaultDealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
 
 const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 const navLinks = document.getElementById("navLinks");
@@ -184,6 +185,7 @@ async function hashPassword(password) {
             .map((value) => value.toString(16).padStart(2, "0"))
             .join("");
     }
+    // Legacy-browser fallback only. btoa is not cryptographically secure.
     return btoa(password);
 }
 
@@ -236,7 +238,10 @@ function loadManagedDeals() {
         const parsed = JSON.parse(saved);
         if (!Array.isArray(parsed)) return;
         const normalized = parsed.map(normalizeDeal).filter(Boolean);
-        if (normalized.length > 0) dealsData = normalized;
+        if (normalized.length > 0) {
+            dealsData = normalized;
+            nextDealId = dealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+        }
     } catch (_error) {
         showToast("Could not load saved deals. Using defaults.", "info");
     }
@@ -465,14 +470,22 @@ if (productForm) {
             showToast("Please fill in all required product details.", "info");
             return;
         }
-        if (currentPrice <= 0 || originalPrice <= 0 || currentPrice >= originalPrice) {
-            showToast("Enter valid prices. Current price must be less than original price.", "info");
+        if (currentPrice <= 0) {
+            showToast("Current price must be greater than 0.", "info");
+            return;
+        }
+        if (originalPrice <= 0) {
+            showToast("Original price must be greater than 0.", "info");
+            return;
+        }
+        if (currentPrice >= originalPrice) {
+            showToast("Current price must be less than original price.", "info");
             return;
         }
 
         const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
         const newDeal = {
-            id: productId || dealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1,
+            id: productId || nextDealId,
             brand,
             title,
             description,
@@ -491,6 +504,7 @@ if (productForm) {
             showToast("Product updated successfully.", "success");
         } else {
             dealsData.unshift(newDeal);
+            nextDealId += 1;
             showToast("Product added and published successfully.", "success");
         }
 
@@ -513,6 +527,7 @@ if (resetDealsBtn) {
             return;
         }
         dealsData = JSON.parse(JSON.stringify(defaultDealsData));
+        nextDealId = dealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
         saveManagedDeals();
         renderDeals("all");
         resetProductForm();
