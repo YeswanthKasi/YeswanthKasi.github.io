@@ -67,6 +67,16 @@
         </div>
     </section>
 
+    <section class="promo-banner" id="promoBanner">
+        <div class="container promo-banner-content">
+            <div>
+                <h2 id="promoHeading">Today’s Featured Promotion</h2>
+                <p id="promoText">Discover special affiliate offers handpicked by Kasireddi Deals.</p>
+            </div>
+            <a href="#deals" class="btn btn-primary" id="promoCta">View Promotion</a>
+        </div>
+    </section>
+
     <!-- About Section -->
     <section class="about" id="about">
         <div class="container">
@@ -163,10 +173,25 @@
                 <button class="filter-btn" data-filter="new">✨ New</button>
                 <button class="filter-btn" data-filter="ending">⏰ Ending Soon</button>
             </div>
-            <div class="product-manager" id="productManager">
-                <h3>Add Affiliate Product</h3>
-                <p>Add your affiliate products (including Amazon links) and publish them instantly on this page.</p>
+            <div class="owner-access-panel" id="ownerAccessPanel">
+                <h3>Owner Access</h3>
+                <p id="ownerAccessStatus">Only owner login can manage products, promotions, and ad settings.</p>
+                <form class="owner-form" id="ownerSetupForm">
+                    <input type="password" id="ownerPasswordSetup" placeholder="Set owner password" minlength="6" required>
+                    <input type="password" id="ownerPasswordSetupConfirm" placeholder="Confirm owner password" minlength="6" required>
+                    <button type="submit" class="btn btn-primary">Set Owner Password</button>
+                </form>
+                <form class="owner-form" id="ownerLoginForm">
+                    <input type="password" id="ownerPasswordLogin" placeholder="Enter owner password" required>
+                    <button type="submit" class="btn btn-primary">Unlock Management</button>
+                </form>
+                <button class="btn btn-secondary" id="ownerLogoutBtn" type="button">Lock Management</button>
+            </div>
+            <div class="product-manager hidden" id="productManager">
+                <h3>Manage Affiliate Products</h3>
+                <p>Add, edit, and delete affiliate products (including Amazon links) directly on this page.</p>
                 <form class="product-form" id="productForm">
+                    <input type="hidden" id="productId">
                     <input type="text" id="productBrand" placeholder="Brand (e.g., Amazon Basics)" required>
                     <input type="text" id="productTitle" placeholder="Product Title" required>
                     <input type="text" id="productDescription" placeholder="Short Description" required>
@@ -190,7 +215,30 @@
                     <input type="number" id="productOriginalPrice" placeholder="Original Price (e.g., 89.99)" min="0" step="0.01" required>
                     <input type="url" id="productAffiliateUrl" placeholder="Affiliate URL (https://...)" required>
                     <input type="text" id="productExpires" placeholder="Expiry label (e.g., 2 days left)" required>
-                    <button type="submit" class="btn btn-primary">Add Product</button>
+                    <button type="submit" class="btn btn-primary" id="productSubmitBtn">Save Product</button>
+                    <button type="button" class="btn btn-secondary" id="productCancelEditBtn">Cancel Edit</button>
+                    <button type="button" class="btn btn-secondary" id="resetDealsBtn">Reset to Default Deals</button>
+                </form>
+            </div>
+            <div class="site-settings hidden" id="siteSettings">
+                <h3>Promotion & Ads Settings</h3>
+                <p>Manage promotion banner content and ad visibility directly from the website.</p>
+                <form class="settings-form" id="siteSettingsForm">
+                    <input type="text" id="promoHeadingInput" placeholder="Promo heading" required>
+                    <input type="text" id="promoTextInput" placeholder="Promo text" required>
+                    <input type="text" id="promoCtaTextInput" placeholder="Promo button text" required>
+                    <input type="text" id="promoCtaUrlInput" placeholder="Promo button URL (https://... or #deals)" required>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="promoEnabledInput">
+                        Show promotion banner
+                    </label>
+                    <input type="text" id="adsClientInput" placeholder="AdSense client id (ca-pub-...)" required>
+                    <input type="text" id="adsSlotInput" placeholder="Ad slot id" required>
+                    <label class="settings-checkbox">
+                        <input type="checkbox" id="adsEnabledInput">
+                        Show ads section
+                    </label>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
                 </form>
             </div>
             <div class="deals-grid" id="dealsGrid">
@@ -208,15 +256,12 @@
                 <h2>Sponsored Offers</h2>
                 <p>Google ads can appear below after you replace the publisher and slot IDs.</p>
             </div>
-            <ins class="adsbygoogle ad-slot"
+            <ins id="adsDisplay" class="adsbygoogle ad-slot"
                  style="display:block"
                  data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
                  data-ad-slot="1234567890"
                  data-ad-format="auto"
                  data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
         </div>
     </section>
 

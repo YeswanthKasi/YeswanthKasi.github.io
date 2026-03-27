@@ -226,6 +226,28 @@ h3 {
     overflow: hidden;
 }
 
+.promo-banner {
+    padding: 50px 0;
+    background: linear-gradient(135deg, #111827, #1f2937);
+    color: #fff;
+}
+
+.promo-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.promo-banner h2 {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    margin-bottom: 8px;
+}
+
+.promo-banner p {
+    opacity: 0.9;
+}
+
 .hero .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -441,6 +463,45 @@ h3 {
     margin-bottom: 36px;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.owner-access-panel,
+.site-settings {
+    background: var(--background-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.owner-access-panel h3,
+.site-settings h3 {
+    margin-bottom: 8px;
+}
+
+.owner-access-panel p,
+.site-settings p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.owner-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.owner-form input {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+}
+
 .product-manager h3 {
     margin-bottom: 8px;
 }
@@ -467,6 +528,36 @@ h3 {
 }
 
 .product-form .btn {
+    grid-column: span 1;
+}
+
+#productSubmitBtn {
+    grid-column: 1 / -1;
+}
+
+.settings-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.settings-form input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.settings-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.settings-form .btn {
     grid-column: 1 / -1;
 }
 
@@ -599,6 +690,22 @@ h3 {
 
 .deal-btn:hover {
     background: var(--primary-dark);
+}
+
+.deal-admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.deal-admin-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+}
+
+.deal-delete-btn {
+    background: var(--danger-color);
 }
 
 .deal-expires {
@@ -1007,7 +1114,16 @@ h3 {
         grid-template-columns: 1fr;
     }
 
+    .promo-banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .product-form {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-form {
         grid-template-columns: 1fr;
     }
 
