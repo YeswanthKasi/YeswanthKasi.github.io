@@ -11,7 +11,8 @@ const dealsData = [
         badge: "hot",
         category: "electronics",
         icon: "🎧",
-        expires: "3 days left"
+        expires: "3 days left",
+        affiliateUrl: "https://www.amazon.com/"
     },
     {
         id: 2,
@@ -24,7 +25,8 @@ const dealsData = [
         badge: "new",
         category: "fashion",
         icon: "👗",
-        expires: "5 days left"
+        expires: "5 days left",
+        affiliateUrl: "https://www.amazon.com/"
     },
     {
         id: 3,
@@ -37,7 +39,8 @@ const dealsData = [
         badge: "hot",
         category: "home",
         icon: "🏠",
-        expires: "2 days left"
+        expires: "2 days left",
+        affiliateUrl: "https://www.amazon.com/"
     },
     {
         id: 4,
@@ -50,7 +53,8 @@ const dealsData = [
         badge: "new",
         category: "health",
         icon: "⌚",
-        expires: "7 days left"
+        expires: "7 days left",
+        affiliateUrl: "https://www.amazon.com/"
     },
     {
         id: 5,
@@ -63,7 +67,8 @@ const dealsData = [
         badge: "ending",
         category: "beauty",
         icon: "💆",
-        expires: "1 day left"
+        expires: "1 day left",
+        affiliateUrl: "https://www.amazon.com/"
     },
     {
         id: 6,
@@ -76,9 +81,12 @@ const dealsData = [
         badge: "hot",
         category: "travel",
         icon: "🏨",
-        expires: "4 days left"
+        expires: "4 days left",
+        affiliateUrl: "https://www.amazon.com/"
     }
 ];
+
+const customDealsStorageKey = 'kasireddiCustomDeals';
 
 // Toast notification system
 function showToast(message, type = 'success') {
@@ -109,25 +117,82 @@ function showToast(message, type = 'success') {
     }, 4000);
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function safeURL(url) {
+    try {
+        const parsed = new URL(url);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.toString();
+        }
+    } catch (error) {
+        return null;
+    }
+    return null;
+}
+
+function saveCustomDeals() {
+    const customDeals = dealsData.filter(deal => deal.isCustom);
+    localStorage.setItem(customDealsStorageKey, JSON.stringify(customDeals));
+}
+
+function loadCustomDeals() {
+    try {
+        const saved = localStorage.getItem(customDealsStorageKey);
+        if (!saved) return;
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) return;
+
+        parsed.forEach(deal => {
+            if (
+                deal &&
+                typeof deal.id === 'number' &&
+                typeof deal.brand === 'string' &&
+                typeof deal.title === 'string' &&
+                typeof deal.description === 'string' &&
+                typeof deal.discount === 'string' &&
+                typeof deal.badge === 'string' &&
+                typeof deal.category === 'string' &&
+                typeof deal.icon === 'string' &&
+                typeof deal.expires === 'string' &&
+                typeof deal.currentPrice === 'number' &&
+                typeof deal.originalPrice === 'number' &&
+                typeof deal.affiliateUrl === 'string'
+            ) {
+                dealsData.push(deal);
+            }
+        });
+    } catch (error) {
+        showToast('Could not load saved custom products.', 'info');
+    }
+}
+
 // Generate deal card HTML (reusable function)
 function generateDealCardHTML(deal) {
     return `
         <div class="deal-card" data-category="${deal.category}">
             <div class="deal-image">
-                ${deal.icon}
+                ${escapeHtml(deal.icon)}
                 <span class="deal-badge ${deal.badge}">${deal.discount}</span>
             </div>
             <div class="deal-content">
-                <span class="deal-brand">${deal.brand}</span>
-                <h3>${deal.title}</h3>
-                <p>${deal.description}</p>
+                <span class="deal-brand">${escapeHtml(deal.brand)}</span>
+                <h3>${escapeHtml(deal.title)}</h3>
+                <p>${escapeHtml(deal.description)}</p>
                 <div class="deal-price">
                     <span class="price-current">$${deal.currentPrice.toFixed(2)}</span>
                     <span class="price-original">$${deal.originalPrice.toFixed(2)}</span>
                 </div>
                 <div class="deal-footer">
                     <button class="deal-btn" onclick="handleDealClick(${deal.id})">Get Deal</button>
-                    <span class="deal-expires">⏰ ${deal.expires}</span>
+                    <span class="deal-expires">⏰ ${escapeHtml(deal.expires)}</span>
                 </div>
             </div>
         </div>
@@ -142,6 +207,7 @@ const dealsGrid = document.getElementById('dealsGrid');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const newsletterForm = document.getElementById('newsletterForm');
 const contactForm = document.getElementById('contactForm');
+const productForm = document.getElementById('productForm');
 
 // Mobile Menu Toggle
 if (mobileMenuBtn && navLinks) {
@@ -197,8 +263,13 @@ filterBtns.forEach(btn => {
 function handleDealClick(dealId) {
     const deal = dealsData.find(d => d.id === dealId);
     if (deal) {
-        // In a real application, this would redirect to an affiliate link
+        const redirectUrl = safeURL(deal.affiliateUrl);
+        if (!redirectUrl) {
+            showToast('This deal does not have a valid affiliate link yet.', 'info');
+            return;
+        }
         showToast(`Redirecting you to ${deal.brand} for the "${deal.title}" deal!`, 'success');
+        window.open(redirectUrl, '_blank', 'noopener,noreferrer');
     }
 }
 
@@ -220,6 +291,67 @@ if (contactForm) {
         e.preventDefault();
         showToast('Thank you for your message! We\'ll get back to you soon.', 'success');
         contactForm.reset();
+    });
+}
+
+if (productForm) {
+    productForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const brand = productForm.querySelector('#productBrand').value.trim();
+        const title = productForm.querySelector('#productTitle').value.trim();
+        const description = productForm.querySelector('#productDescription').value.trim();
+        const category = productForm.querySelector('#productCategory').value;
+        const badge = productForm.querySelector('#productBadge').value;
+        const icon = productForm.querySelector('#productIcon').value.trim();
+        const expires = productForm.querySelector('#productExpires').value.trim();
+        const affiliateUrl = productForm.querySelector('#productAffiliateUrl').value.trim();
+        const currentPrice = Number(productForm.querySelector('#productCurrentPrice').value);
+        const originalPrice = Number(productForm.querySelector('#productOriginalPrice').value);
+
+        const cleanAffiliateUrl = safeURL(affiliateUrl);
+        if (!cleanAffiliateUrl) {
+            showToast('Please enter a valid http(s) affiliate URL.', 'info');
+            return;
+        }
+
+        if (!brand || !title || !description || !category || !badge || !icon || !expires) {
+            showToast('Please fill in all required product details.', 'info');
+            return;
+        }
+
+        if (currentPrice <= 0 || originalPrice <= 0 || currentPrice > originalPrice) {
+            showToast('Enter valid prices. Current price must be less than or equal to original price.', 'info');
+            return;
+        }
+
+        const nextId = dealsData.reduce((max, deal) => Math.max(max, deal.id), 0) + 1;
+        const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+
+        dealsData.unshift({
+            id: nextId,
+            brand,
+            title,
+            description,
+            currentPrice,
+            originalPrice,
+            discount: `${discountPercent}% OFF`,
+            badge,
+            category,
+            icon,
+            expires,
+            affiliateUrl: cleanAffiliateUrl,
+            isCustom: true
+        });
+
+        saveCustomDeals();
+        renderDeals('all');
+        filterBtns.forEach(btn => btn.classList.remove('active'));
+        if (filterBtns[0]) {
+            filterBtns[0].classList.add('active');
+        }
+        productForm.reset();
+        showToast('Affiliate product added and published successfully!', 'success');
     });
 }
 
@@ -278,6 +410,7 @@ document.querySelectorAll('section').forEach(section => {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    loadCustomDeals();
     renderDeals();
 });
 
