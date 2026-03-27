@@ -1,4 +1,4 @@
-# DealHub - Affiliate Marketing Website
+# Kasireddi's Deals Hub - Affiliate Marketing Website
 
 A modern, responsive affiliate marketing website for promoting products and deals across various categories.
 
@@ -8,9 +8,11 @@ A modern, responsive affiliate marketing website for promoting products and deal
 - **Modern UI/UX**: Clean and professional design with smooth animations
 - **Category Browsing**: Browse deals by category (Electronics, Fashion, Home, Health, Beauty, Travel)
 - **Deal Filtering**: Filter deals by Hot, New, or Ending Soon
+- **Affiliate Product Manager**: Add and list your own affiliate products directly from the website
 - **Newsletter Signup**: Capture visitor emails for marketing campaigns
 - **Contact Form**: Allow visitors and potential partners to get in touch
 - **SEO Friendly**: Includes meta tags for better search engine visibility
+- **AdSense Ready**: Google AdSense placeholders included for monetization setup
 
 ## Sections
 
@@ -40,9 +42,14 @@ Simply deploy to any static hosting service. The website is hosted at:
 ## Customization
 
 To add your own affiliate links:
-1. Edit the `dealsData` array in `script.js`
-2. Update the `handleDealClick` function to redirect to your affiliate links
-3. Customize branding in `index.html` and `styles.css`
+1. Use the **Add Affiliate Product** form in the Deals section on the website
+2. Enter your product details and paste your affiliate URL (Amazon links are supported)
+3. New products are saved in browser local storage and rendered in the deals grid
+
+To configure Google AdSense:
+1. Open `index.html`
+2. Replace `ca-pub-XXXXXXXXXXXXXXXX` with your real AdSense publisher ID
+3. Replace `data-ad-slot="1234567890"` with your ad slot ID
 
 ## License
 
