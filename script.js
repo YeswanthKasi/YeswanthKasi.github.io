@@ -6,51 +6,51 @@ const badges = ["hot", "new", "festival", "price-drop"];
 const defaultProducts = [
     {
         id: "p-3001",
-        brand: "Amazon Basics",
-        title: "Laptop Sleeve 15.6 inch",
+        brand: "Apple",
+        title: "AirPods Pro (2nd Gen)",
         category: "electronics",
-        badge: "new",
-        listPrice: 1299,
-        dealPrice: 899,
-        coupon: "",
+        badge: "hot",
+        listPrice: 20999,
+        dealPrice: 16499,
+        coupon: "KASIREDDI10",
         expiresOn: "2026-12-31",
         affiliateUrl: "",
         imageUrl: "",
-        note: "Lightweight sleeve with extra front pocket.",
+        note: "Active noise cancellation, adaptive audio, premium sound quality. High commission product.",
         featured: true,
         createdAt: 1743100001000,
         updatedAt: 1743100001000
     },
     {
         id: "p-3002",
-        brand: "Puma",
-        title: "Running Shoes",
-        category: "fashion",
-        badge: "hot",
-        listPrice: 4999,
-        dealPrice: 2999,
-        coupon: "",
-        expiresOn: "2026-11-20",
+        brand: "Xiaomi",
+        title: "11A Smart TV 43 inch",
+        category: "electronics",
+        badge: "price-drop",
+        listPrice: 24999,
+        dealPrice: 19999,
+        coupon: "SUMMER30",
+        expiresOn: "2026-12-15",
         affiliateUrl: "",
         imageUrl: "",
-        note: "Everyday comfort running shoe for long use.",
-        featured: false,
+        note: "4K resolution, Dolby Atmos, smart OS. Best for gaming and streaming. Excellent margins.",
+        featured: true,
         createdAt: 1743100002000,
         updatedAt: 1743100002000
     },
     {
         id: "p-3003",
-        brand: "Prestige",
-        title: "Nonstick Cookware Set",
-        category: "home",
-        badge: "festival",
-        listPrice: 5599,
-        dealPrice: 3699,
-        coupon: "",
-        expiresOn: "2026-10-15",
+        brand: "Nike",
+        title: "Revolution 7 Running Shoes",
+        category: "fashion",
+        badge: "new",
+        listPrice: 6299,
+        dealPrice: 3999,
+        coupon: "FITPRO20",
+        expiresOn: "2026-11-20",
         affiliateUrl: "",
         imageUrl: "",
-        note: "Daily cooking bundle for home kitchen.",
+        note: "Comfortable cushioning for daily wear and workouts. Popular high-traffic product.",
         featured: true,
         createdAt: 1743100003000,
         updatedAt: 1743100003000
@@ -812,8 +812,8 @@ async function initializeCloudSecurity() {
         subscribeToCloudContent();
         return true;
     } catch (_error) {
+        console.error("Cloud auth not available, using local fallback.", _error.message);
         state.cloudReady = false;
-        showToast("Firebase initialization failed. Running read-only fallback mode.", "error");
         return false;
     }
 }
@@ -1377,10 +1377,6 @@ async function init() {
 
     const cloudOk = await initializeCloudSecurity();
     updateOwnerUI();
-
-    if (!cloudOk) {
-        showToast("Running fallback mode. Configure Firebase for production security.", "info");
-    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
