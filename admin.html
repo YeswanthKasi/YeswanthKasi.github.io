@@ -48,6 +48,7 @@
                 <button class="admin-tab" data-tab="promotion" type="button">Promotion</button>
                 <button class="admin-tab" data-tab="site" type="button">Site</button>
                 <button class="admin-tab" data-tab="ads" type="button">Ads</button>
+                <button class="admin-tab" data-tab="sponsorship" type="button">Sponsorship</button>
                 <button class="admin-tab" data-tab="backup" type="button">Backup</button>
             </div>
 
@@ -227,6 +228,43 @@
                     </label>
                     <div class="form-actions full">
                         <button class="btn btn-primary" type="submit">Save Ads</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-panel" id="panel-sponsorship">
+                <h3>Sponsorship Settings</h3>
+                <form class="admin-form" id="sponsorshipForm">
+                    <label>
+                        Section Heading
+                        <input type="text" id="sponsorHeadingInput" required>
+                    </label>
+                    <label class="full">
+                        Section Intro Text
+                        <input type="text" id="sponsorTextInput" required>
+                    </label>
+                    <label>
+                        Card Title
+                        <input type="text" id="sponsorCardTitleInput" required>
+                    </label>
+                    <label class="full">
+                        Card Body
+                        <input type="text" id="sponsorCardBodyInput" required>
+                    </label>
+                    <label>
+                        CTA Text
+                        <input type="text" id="sponsorCtaTextInput" required>
+                    </label>
+                    <label>
+                        CTA URL
+                        <input type="text" id="sponsorCtaUrlInput" placeholder="#contact or https://" required>
+                    </label>
+                    <label class="checkbox-field full">
+                        <input type="checkbox" id="sponsorEnabledInput">
+                        Show sponsorship section
+                    </label>
+                    <div class="form-actions full">
+                        <button class="btn btn-primary" type="submit">Save Sponsorship</button>
                     </div>
                 </form>
             </div>

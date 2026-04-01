@@ -79,6 +79,15 @@ const defaultSettings = {
         disclaimer: "Ads are managed securely by site owner.",
         client: "ca-pub-6185830543809180",
         slot: "1234567890"
+    },
+    sponsorship: {
+        enabled: true,
+        heading: "Brand Sponsorship",
+        text: "Feature one premium partner campaign with full control over message and CTA.",
+        cardTitle: "Featured Partner Campaign",
+        cardBody: "Use this slot for high-ticket sponsorships, launches, and festival partner offers.",
+        ctaText: "View Sponsorship",
+        ctaUrl: "#contact"
     }
 };
 
@@ -168,6 +177,13 @@ const elements = {
     adsHeading: document.getElementById("adsHeading"),
     adsDisclaimer: document.getElementById("adsDisclaimer"),
 
+    sponsorSection: document.getElementById("sponsorSection"),
+    sponsorHeading: document.getElementById("sponsorHeading"),
+    sponsorText: document.getElementById("sponsorText"),
+    sponsorCardTitle: document.getElementById("sponsorCardTitle"),
+    sponsorCardBody: document.getElementById("sponsorCardBody"),
+    sponsorCta: document.getElementById("sponsorCta"),
+
     inquiryForm: document.getElementById("inquiryForm"),
 
     devModal: document.getElementById("devModal"),
@@ -194,6 +210,7 @@ const elements = {
     promotionForm: document.getElementById("promotionForm"),
     siteSettingsForm: document.getElementById("siteSettingsForm"),
     adsSettingsForm: document.getElementById("adsSettingsForm"),
+    sponsorshipForm: document.getElementById("sponsorshipForm"),
 
     exportDataBtn: document.getElementById("exportDataBtn"),
     importDataInput: document.getElementById("importDataInput"),
@@ -419,6 +436,10 @@ function normalizeSettings(raw) {
         ads: {
             ...defaultSettings.ads,
             ...(raw && raw.ads ? raw.ads : {})
+        },
+        sponsorship: {
+            ...defaultSettings.sponsorship,
+            ...(raw && raw.sponsorship ? raw.sponsorship : {})
         }
     };
 
@@ -440,6 +461,14 @@ function normalizeSettings(raw) {
     merged.ads.disclaimer = String(merged.ads.disclaimer || defaultSettings.ads.disclaimer).trim();
     merged.ads.client = String(merged.ads.client || defaultSettings.ads.client).trim();
     merged.ads.slot = String(merged.ads.slot || defaultSettings.ads.slot).trim();
+
+    merged.sponsorship.enabled = Boolean(merged.sponsorship.enabled);
+    merged.sponsorship.heading = String(merged.sponsorship.heading || defaultSettings.sponsorship.heading).trim();
+    merged.sponsorship.text = String(merged.sponsorship.text || defaultSettings.sponsorship.text).trim();
+    merged.sponsorship.cardTitle = String(merged.sponsorship.cardTitle || defaultSettings.sponsorship.cardTitle).trim();
+    merged.sponsorship.cardBody = String(merged.sponsorship.cardBody || defaultSettings.sponsorship.cardBody).trim();
+    merged.sponsorship.ctaText = String(merged.sponsorship.ctaText || defaultSettings.sponsorship.ctaText).trim();
+    merged.sponsorship.ctaUrl = safeActionUrl(merged.sponsorship.ctaUrl) || defaultSettings.sponsorship.ctaUrl;
 
     return merged;
 }
@@ -630,10 +659,26 @@ function applyAdsContent() {
     }
 }
 
+function applySponsorshipContent() {
+    if (!elements.sponsorSection) return;
+    const sponsor = state.settings.sponsorship;
+    elements.sponsorSection.classList.toggle("hidden", !sponsor.enabled);
+
+    if (elements.sponsorHeading) elements.sponsorHeading.textContent = sponsor.heading;
+    if (elements.sponsorText) elements.sponsorText.textContent = sponsor.text;
+    if (elements.sponsorCardTitle) elements.sponsorCardTitle.textContent = sponsor.cardTitle;
+    if (elements.sponsorCardBody) elements.sponsorCardBody.textContent = sponsor.cardBody;
+    if (elements.sponsorCta) {
+        elements.sponsorCta.textContent = sponsor.ctaText;
+        elements.sponsorCta.setAttribute("href", sponsor.ctaUrl);
+    }
+}
+
 function applyAllUI() {
     applySiteContent();
     applyPromoContent();
     applyAdsContent();
+    applySponsorshipContent();
     renderMetrics();
     renderDeals();
     renderAdminTable();
@@ -745,6 +790,16 @@ function loadAdminFormsFromState() {
         elements.adsSettingsForm.querySelector("#adsDisclaimerInput").value = state.settings.ads.disclaimer;
         elements.adsSettingsForm.querySelector("#adsEnabledInput").checked = state.settings.ads.enabled;
     }
+
+    if (elements.sponsorshipForm) {
+        elements.sponsorshipForm.querySelector("#sponsorHeadingInput").value = state.settings.sponsorship.heading;
+        elements.sponsorshipForm.querySelector("#sponsorTextInput").value = state.settings.sponsorship.text;
+        elements.sponsorshipForm.querySelector("#sponsorCardTitleInput").value = state.settings.sponsorship.cardTitle;
+        elements.sponsorshipForm.querySelector("#sponsorCardBodyInput").value = state.settings.sponsorship.cardBody;
+        elements.sponsorshipForm.querySelector("#sponsorCtaTextInput").value = state.settings.sponsorship.ctaText;
+        elements.sponsorshipForm.querySelector("#sponsorCtaUrlInput").value = state.settings.sponsorship.ctaUrl;
+        elements.sponsorshipForm.querySelector("#sponsorEnabledInput").checked = state.settings.sponsorship.enabled;
+    }
 }
 
 function getLocalFallback(key) {
@@ -845,28 +900,15 @@ async function initializeCloudSecurity() {
         cloud.auth = cloud.getAuth(cloud.app);
         cloud.db = cloud.getFirestore(cloud.app);
 
-        const persistence = isAdminPage() && cloud.inMemoryPersistence
-            ? cloud.inMemoryPersistence
-            : cloud.browserLocalPersistence;
-        await cloud.setPersistence(cloud.auth, persistence);
+        await cloud.setPersistence(cloud.auth, cloud.browserLocalPersistence);
 
         state.cloudReady = true;
 
         // Complete redirect-based sign-in flows when popup is blocked.
-        let redirectUser = null;
         try {
-            const redirectResult = await cloud.getRedirectResult(cloud.auth);
-            redirectUser = redirectResult?.user || null;
+            await cloud.getRedirectResult(cloud.auth);
         } catch (error) {
             showToast(readableAuthError(error), "error");
-        }
-
-        if (isAdminPage() && !redirectUser) {
-            try {
-                await cloud.signOut(cloud.auth);
-            } catch (_error) {
-                // no-op
-            }
         }
 
         cloud.onAuthStateChanged(cloud.auth, async (user) => {
@@ -1149,6 +1191,33 @@ function bindEvents() {
         });
     }
 
+    if (isAdminPage()) {
+        const backLink = document.querySelector(".admin-links a[href='index.html']");
+        if (backLink) {
+            backLink.addEventListener("click", async (event) => {
+                event.preventDefault();
+                let shouldSignOut = false;
+                if (state.ownerUnlocked) {
+                    shouldSignOut = window.confirm("Sign out before leaving admin page? Click OK to sign out, Cancel to stay logged in.");
+                }
+                if (shouldSignOut && state.cloudReady && cloud.auth) {
+                    try {
+                        await cloud.signOut(cloud.auth);
+                    } catch (_error) {
+                        // no-op
+                    }
+                }
+                window.location.href = "index.html";
+            });
+        }
+
+        window.addEventListener("beforeunload", (event) => {
+            if (!state.ownerUnlocked) return;
+            event.preventDefault();
+            event.returnValue = "";
+        });
+    }
+
     if (elements.adminTabs.length > 0) {
         elements.adminTabs.forEach((tabButton) => {
             tabButton.addEventListener("click", () => {
@@ -1355,6 +1424,40 @@ function bindEvents() {
                 showToast("Ads settings updated.", "success");
             } catch (error) {
                 showToast(readableCloudError(error, "Failed to update ads settings."), "error");
+            }
+        });
+    }
+
+    if (elements.sponsorshipForm) {
+        elements.sponsorshipForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update sponsorship settings.", "error");
+                return;
+            }
+
+            const sponsorship = {
+                enabled: elements.sponsorshipForm.querySelector("#sponsorEnabledInput").checked,
+                heading: elements.sponsorshipForm.querySelector("#sponsorHeadingInput").value.trim(),
+                text: elements.sponsorshipForm.querySelector("#sponsorTextInput").value.trim(),
+                cardTitle: elements.sponsorshipForm.querySelector("#sponsorCardTitleInput").value.trim(),
+                cardBody: elements.sponsorshipForm.querySelector("#sponsorCardBodyInput").value.trim(),
+                ctaText: elements.sponsorshipForm.querySelector("#sponsorCtaTextInput").value.trim(),
+                ctaUrl: safeActionUrl(elements.sponsorshipForm.querySelector("#sponsorCtaUrlInput").value.trim())
+            };
+
+            if (!sponsorship.heading || !sponsorship.text || !sponsorship.cardTitle || !sponsorship.cardBody || !sponsorship.ctaText || !sponsorship.ctaUrl) {
+                showToast("Fill all sponsorship fields with valid values.", "error");
+                return;
+            }
+
+            state.settings.sponsorship = sponsorship;
+
+            try {
+                await saveSettingsToCloud();
+                showToast("Sponsorship settings updated.", "success");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to update sponsorship settings."), "error");
             }
         });
     }
