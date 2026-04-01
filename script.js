@@ -663,7 +663,6 @@ function updateOwnerUI() {
                 node.disabled = true;
             });
         }
-        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.disabled = true;
         elements.ownerLogoutBtn.classList.add("hidden");
         elements.adminDashboard.classList.add("hidden");
         return;
@@ -674,16 +673,12 @@ function updateOwnerUI() {
             node.disabled = false;
         });
     }
-    if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.disabled = false;
-
     if (state.ownerUnlocked) {
         elements.ownerAccessStatus.textContent = `Authenticated as ${state.activeOwnerEmail || "owner"}. Admin controls enabled.`;
-        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.classList.add("hidden");
         elements.ownerLogoutBtn.classList.remove("hidden");
         elements.adminDashboard.classList.remove("hidden");
     } else {
-        elements.ownerAccessStatus.textContent = "Sign in with your authorized owner account.";
-        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.classList.remove("hidden");
+        elements.ownerAccessStatus.textContent = "Sign in with your owner email and password.";
         elements.ownerLogoutBtn.classList.add("hidden");
         elements.adminDashboard.classList.add("hidden");
     }
@@ -1103,30 +1098,28 @@ function bindEvents() {
     if (elements.ownerLoginForm) {
         elements.ownerLoginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-            showToast("Email/password owner login has been disabled. Use Google owner sign-in.", "info");
-        });
-    }
-
-    if (elements.ownerGoogleLoginBtn) {
-        elements.ownerGoogleLoginBtn.addEventListener("click", async () => {
-            if (!state.cloudReady || !cloud.auth || !cloud.signInWithPopup || !cloud.signInWithRedirect || !cloud.GoogleAuthProvider) {
+            if (!state.cloudReady || !cloud.auth) {
                 showToast("Cloud auth is not configured yet.", "error");
                 return;
             }
 
+            const email = elements.ownerEmailLogin?.value.trim();
+            const password = elements.ownerPasswordLogin?.value;
+            if (!email || !password) {
+                showToast("Enter owner email and password.", "error");
+                return;
+            }
+
+            if (cloud.ownerEmail && email.toLowerCase() !== cloud.ownerEmail.toLowerCase()) {
+                showToast("Only the configured owner email is allowed.", "error");
+                return;
+            }
+
             try {
-                const provider = new cloud.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: "select_account" });
-                await cloud.signInWithPopup(cloud.auth, provider);
-                showToast("Google sign in successful.", "success");
+                await cloud.signInWithEmailAndPassword(cloud.auth, email, password);
+                if (elements.ownerPasswordLogin) elements.ownerPasswordLogin.value = "";
+                showToast("Sign in successful.", "success");
             } catch (error) {
-                if (error?.code === "auth/popup-blocked") {
-                    showToast(readableAuthError(error), "info");
-                    const provider = new cloud.GoogleAuthProvider();
-                    provider.setCustomParameters({ prompt: "select_account" });
-                    await cloud.signInWithRedirect(cloud.auth, provider);
-                    return;
-                }
                 showToast(readableAuthError(error), "error");
             }
         });

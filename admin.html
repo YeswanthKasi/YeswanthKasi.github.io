@@ -29,12 +29,16 @@
             <div class="auth-card">
                 <p class="section-kicker">Owner Access</p>
                 <h1>Admin Control Center</h1>
-                <p id="ownerAccessStatus">Sign in with your authorized owner account.</p>
+                <p id="ownerAccessStatus">Sign in with your owner email and password.</p>
+                <form class="owner-form" id="ownerLoginForm">
+                    <input type="email" id="ownerEmailLogin" placeholder="Owner email" autocomplete="username" required>
+                    <input type="password" id="ownerPasswordLogin" placeholder="Owner password" autocomplete="current-password" required>
+                    <button class="btn btn-primary" type="submit">Sign In</button>
+                </form>
                 <div class="form-actions">
-                    <button class="btn btn-primary" id="ownerGoogleLoginBtn" type="button">Sign In With Google</button>
                     <button class="btn btn-outline hidden" id="ownerLogoutBtn" type="button">Sign Out</button>
                 </div>
-                <p class="auth-hint">Only your UID is authorized. Other accounts are blocked automatically.</p>
+                <p class="auth-hint">Only your owner UID can unlock admin controls. New account creation is not available in this panel.</p>
             </div>
         </section>
 
