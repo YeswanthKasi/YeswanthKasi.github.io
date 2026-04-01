@@ -119,6 +119,7 @@ const cloud = {
     signOut: null,
     setPersistence: null,
     browserLocalPersistence: null,
+    inMemoryPersistence: null,
 
     getFirestore: null,
     doc: null,
@@ -209,6 +210,11 @@ function decodePrivateEmail() {
 
 function clone(value) {
     return JSON.parse(JSON.stringify(value));
+}
+
+function isAdminPage() {
+    const path = location.pathname.toLowerCase();
+    return path.endsWith("/admin.html") || path.endsWith("admin.html");
 }
 
 function readableAuthError(error) {
@@ -643,6 +649,7 @@ function updateOwnerUI() {
                 node.disabled = true;
             });
         }
+        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.disabled = true;
         elements.ownerLogoutBtn.classList.add("hidden");
         elements.adminDashboard.classList.add("hidden");
         return;
@@ -653,13 +660,16 @@ function updateOwnerUI() {
             node.disabled = false;
         });
     }
+    if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.disabled = false;
 
     if (state.ownerUnlocked) {
         elements.ownerAccessStatus.textContent = `Authenticated as ${state.activeOwnerEmail || "owner"}. Admin controls enabled.`;
+        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.classList.add("hidden");
         elements.ownerLogoutBtn.classList.remove("hidden");
         elements.adminDashboard.classList.remove("hidden");
     } else {
         elements.ownerAccessStatus.textContent = "Sign in with your authorized owner account.";
+        if (elements.ownerGoogleLoginBtn) elements.ownerGoogleLoginBtn.classList.remove("hidden");
         elements.ownerLogoutBtn.classList.add("hidden");
         elements.adminDashboard.classList.add("hidden");
     }
@@ -798,6 +808,7 @@ async function initializeCloudSecurity() {
         cloud.signOut = firebaseAuth.signOut;
         cloud.setPersistence = firebaseAuth.setPersistence;
         cloud.browserLocalPersistence = firebaseAuth.browserLocalPersistence;
+        cloud.inMemoryPersistence = firebaseAuth.inMemoryPersistence;
 
         cloud.getFirestore = firebaseFirestore.getFirestore;
         cloud.doc = firebaseFirestore.doc;
@@ -815,15 +826,28 @@ async function initializeCloudSecurity() {
         cloud.auth = cloud.getAuth(cloud.app);
         cloud.db = cloud.getFirestore(cloud.app);
 
-        await cloud.setPersistence(cloud.auth, cloud.browserLocalPersistence);
+        const persistence = isAdminPage() && cloud.inMemoryPersistence
+            ? cloud.inMemoryPersistence
+            : cloud.browserLocalPersistence;
+        await cloud.setPersistence(cloud.auth, persistence);
 
         state.cloudReady = true;
 
         // Complete redirect-based sign-in flows when popup is blocked.
+        let redirectUser = null;
         try {
-            await cloud.getRedirectResult(cloud.auth);
+            const redirectResult = await cloud.getRedirectResult(cloud.auth);
+            redirectUser = redirectResult?.user || null;
         } catch (error) {
             showToast(readableAuthError(error), "error");
+        }
+
+        if (isAdminPage() && !redirectUser) {
+            try {
+                await cloud.signOut(cloud.auth);
+            } catch (_error) {
+                // no-op
+            }
         }
 
         cloud.onAuthStateChanged(cloud.auth, async (user) => {
