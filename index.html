@@ -3,463 +3,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kasireddi's Deals Hub helps you discover trusted affiliate offers and Amazon product deals in one place.">
-    <meta name="keywords" content="Kasireddi deals hub, affiliate marketing, amazon affiliate products, discounts, offers, savings">
-    <title>Kasireddi's Deals Hub | Affiliate Product Deals</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Kasireddi Deals is a production-grade India-focused affiliate deals platform with secure owner-managed product listings.">
+    <meta name="keywords" content="Kasireddi Deals, India offers, affiliate marketing, secure admin panel, Amazon listings">
+    <title>Kasireddi Deals | Official Deals Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Replace ca-pub-XXXXXXXXXXXXXXXX with your live AdSense publisher ID before launch -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Teko:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6185830543809180" crossorigin="anonymous"></script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <a href="#" class="logo">
-                <span class="logo-icon">🎯</span>
-                <span class="logo-text">Kasireddi's Deals Hub</span>
+    <div class="bg-pattern" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="navbar" id="navbar">
+        <div class="container nav-wrap">
+            <a href="#home" class="brand" id="brandTrigger">
+                <span class="brand-symbol" id="brandSecretTap">KD</span>
+                <span class="brand-label" id="navBrandTitle">Kasireddi Deals</span>
             </a>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
+
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#best-deals">Best Deals</a></li>
                 <li><a href="#categories">Categories</a></li>
-                <li><a href="#deals">Deals</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#sponsored">Sponsored</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Discover Amazing Deals & Save Big</h1>
-                <p>Your one-stop destination for the best products at unbeatable prices. We handpick the finest deals so you don't have to search.</p>
-                <div class="hero-buttons">
-                    <a href="#deals" class="btn btn-primary">Explore Deals</a>
-                    <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
+    <main>
+        <section class="hero" id="home">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <p class="hero-kicker">India's Curated Affiliate Marketplace</p>
+                    <h1 id="heroTitle">Kasireddi Deals: Official Hub for Smart Daily Savings</h1>
+                    <p class="hero-sub" id="heroSubtitle">Premium product discovery experience with trusted listings, clean categories, and continuously updated offers.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#best-deals">Explore Deals</a>
+                        <a class="btn btn-outline" href="#categories">Browse Categories</a>
+                    </div>
+                    <div class="hero-metrics">
+                        <article>
+                            <h3 id="metricProducts">0</h3>
+                            <p>Live Product Slots</p>
+                        </article>
+                        <article>
+                            <h3 id="metricSavings">INR 0</h3>
+                            <p>Total Visible Savings</p>
+                        </article>
+                        <article>
+                            <h3 id="metricCategories">0</h3>
+                            <p>Active Categories</p>
+                        </article>
+                    </div>
                 </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number">10K+</span>
-                        <span class="stat-label">Happy Customers</span>
+
+                <div class="hero-stage" aria-hidden="true">
+                    <div class="stage-card c1">
+                        <strong>Premium UX</strong>
+                        <span>Smooth, fast, and mobile-optimized</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-number">500+</span>
-                        <span class="stat-label">Partner Brands</span>
+                    <div class="stage-card c2">
+                        <strong>Secure Cloud Admin</strong>
+                        <span>Owner management across devices</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-number">50%</span>
-                        <span class="stat-label">Avg. Savings</span>
+                    <div class="stage-card c3">
+                        <strong>Monetization Ready</strong>
+                        <span>AdSense and affiliate workflows</span>
                     </div>
+                    <div class="stage-orbit"></div>
                 </div>
             </div>
-            <div class="hero-image">
-                <div class="hero-shape"></div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="promo-banner" id="promoBanner">
-        <div class="container promo-banner-content">
-            <div>
-                <h2 id="promoHeading">Today’s Featured Promotion</h2>
-                <p id="promoText">Discover special affiliate offers handpicked by Kasireddi Deals.</p>
+        <section class="promo-ribbon" id="promoRibbon">
+            <div class="container promo-content">
+                <div>
+                    <span class="promo-label" id="promoLabel">Seasonal Picks</span>
+                    <h2 id="promoHeading">Fresh India Deal Drops Are Live</h2>
+                    <p id="promoText">Discover trending products and save more with curated daily offers.</p>
+                </div>
+                <a href="#best-deals" class="btn btn-primary" id="promoCta">View Promotions</a>
             </div>
-            <a href="#deals" class="btn btn-primary" id="promoCta">View Promotion</a>
-        </div>
-    </section>
+        </section>
 
-    <!-- About Section -->
-    <section class="about" id="about">
-        <div class="container">
-            <div class="section-header">
-                <h2>About Us</h2>
-                <p>We're passionate about helping you save money while getting the products you love</p>
+        <section class="deals-section" id="best-deals">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-kicker">Best Deals</p>
+                    <h2>Live Listings With Smart Filters</h2>
+                    <p>Products can be listed first as placeholders and affiliate links can be attached later from private secure admin mode.</p>
+                </div>
+
+                <div class="controls-shell">
+                    <label class="field">
+                        <span>Search</span>
+                        <input type="text" id="searchInput" placeholder="Search brand, product, or notes">
+                    </label>
+                    <label class="field">
+                        <span>Category</span>
+                        <select id="categoryFilter">
+                            <option value="all">All Categories</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="home">Home and Kitchen</option>
+                            <option value="health">Health and Fitness</option>
+                            <option value="beauty">Beauty</option>
+                            <option value="travel">Travel</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Tag</span>
+                        <select id="badgeFilter">
+                            <option value="all">All Tags</option>
+                            <option value="hot">Hot</option>
+                            <option value="new">New</option>
+                            <option value="festival">Festival</option>
+                            <option value="price-drop">Price Drop</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Sort</span>
+                        <select id="sortFilter">
+                            <option value="newest">Newest First</option>
+                            <option value="max-discount">Highest Discount</option>
+                            <option value="low-price">Lowest Price</option>
+                            <option value="ending-soon">Ending Soon</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="deals-grid" id="dealsGrid"></div>
+                <p class="empty-state hidden" id="dealsEmpty">No products match these filters.</p>
             </div>
-            <div class="about-content">
-                <div class="about-text">
-                    <h3>Your Trusted Deal Partner</h3>
-                    <p>Welcome to Kasireddi's Deals Hub! We're dedicated to bringing you the best deals from trusted brands across various categories. Our team works tirelessly to curate exclusive offers, discount codes, and special promotions that help you save money on your everyday purchases.</p>
-                    <p>Whether you're looking for electronics, fashion, home essentials, or lifestyle products, we've got you covered with verified deals that actually work.</p>
-                    <ul class="about-features">
-                        <li>✓ Verified and tested deals</li>
-                        <li>✓ Trusted brand partnerships</li>
-                        <li>✓ Regular updates with fresh offers</li>
-                        <li>✓ No spam, just savings</li>
+        </section>
+
+        <section class="categories" id="categories">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-kicker">Categories</p>
+                    <h2>Shop By Segment</h2>
+                </div>
+                <div class="category-grid">
+                    <button class="category-card" type="button" data-category="electronics">
+                        <h3>Electronics</h3>
+                        <p>Mobiles, audio, laptops, gadgets</p>
+                    </button>
+                    <button class="category-card" type="button" data-category="fashion">
+                        <h3>Fashion</h3>
+                        <p>Clothing, footwear, accessories</p>
+                    </button>
+                    <button class="category-card" type="button" data-category="home">
+                        <h3>Home and Kitchen</h3>
+                        <p>Appliances, decor, essentials</p>
+                    </button>
+                    <button class="category-card" type="button" data-category="health">
+                        <h3>Health and Fitness</h3>
+                        <p>Wellness, gym, and nutrition</p>
+                    </button>
+                    <button class="category-card" type="button" data-category="beauty">
+                        <h3>Beauty</h3>
+                        <p>Skincare, grooming, personal care</p>
+                    </button>
+                    <button class="category-card" type="button" data-category="travel">
+                        <h3>Travel</h3>
+                        <p>Bags, accessories, and booking offers</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="ads-section" id="sponsored">
+            <div class="container" id="adsSection">
+                <div class="section-header">
+                    <p class="section-kicker">Sponsored</p>
+                    <h2 id="adsHeading">Sponsored Offers</h2>
+                    <p id="adsDisclaimer">Ads are managed securely by site owner.</p>
+                </div>
+                <ins id="adsDisplay" class="adsbygoogle ad-slot"
+                    style="display:block"
+                    data-ad-client="ca-pub-6185830543809180"
+                    data-ad-slot="1234567890"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+            </div>
+        </section>
+
+        <section class="contact-section" id="contact">
+            <div class="container contact-grid">
+                <article class="contact-copy">
+                    <p class="section-kicker">Trust</p>
+                    <h2>Built For Real Affiliate Operations</h2>
+                    <ul>
+                        <li>Clear affiliate disclosure and transparent product cards.</li>
+                        <li>Owner identity and controls are protected by cloud authentication.</li>
+                        <li>Listings can go live first and links can be updated later safely.</li>
                     </ul>
-                </div>
-                <div class="about-image">
-                    <div class="about-card">
-                        <div class="card-icon">💰</div>
-                        <h4>Save Money</h4>
-                        <p>Average savings of 50% on all deals</p>
-                    </div>
-                    <div class="about-card">
-                        <div class="card-icon">⭐</div>
-                        <h4>Quality Products</h4>
-                        <p>Only the best brands and items</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                </article>
 
-    <!-- Categories Section -->
-    <section class="categories" id="categories">
-        <div class="container">
-            <div class="section-header">
-                <h2>Browse Categories</h2>
-                <p>Find deals across all your favorite product categories</p>
-            </div>
-            <div class="categories-grid">
-                <div class="category-card" data-category="electronics">
-                    <div class="category-icon">📱</div>
-                    <h3>Electronics</h3>
-                    <p>Phones, Laptops, Gadgets</p>
-                    <span class="deal-count">120+ Deals</span>
-                </div>
-                <div class="category-card" data-category="fashion">
-                    <div class="category-icon">👕</div>
-                    <h3>Fashion</h3>
-                    <p>Clothing, Shoes, Accessories</p>
-                    <span class="deal-count">200+ Deals</span>
-                </div>
-                <div class="category-card" data-category="home">
-                    <div class="category-icon">🏠</div>
-                    <h3>Home & Living</h3>
-                    <p>Furniture, Decor, Appliances</p>
-                    <span class="deal-count">80+ Deals</span>
-                </div>
-                <div class="category-card" data-category="health">
-                    <div class="category-icon">💪</div>
-                    <h3>Health & Fitness</h3>
-                    <p>Supplements, Equipment, Wellness</p>
-                    <span class="deal-count">90+ Deals</span>
-                </div>
-                <div class="category-card" data-category="beauty">
-                    <div class="category-icon">💄</div>
-                    <h3>Beauty</h3>
-                    <p>Skincare, Makeup, Fragrances</p>
-                    <span class="deal-count">150+ Deals</span>
-                </div>
-                <div class="category-card" data-category="travel">
-                    <div class="category-icon">✈️</div>
-                    <h3>Travel</h3>
-                    <p>Hotels, Flights, Experiences</p>
-                    <span class="deal-count">60+ Deals</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Deals Section -->
-    <section class="deals" id="deals">
-        <div class="container">
-            <div class="section-header">
-                <h2>Featured Deals</h2>
-                <p>Handpicked offers with maximum savings</p>
-            </div>
-            <div class="deals-filter">
-                <button class="filter-btn active" data-filter="all">All Deals</button>
-                <button class="filter-btn" data-filter="hot">🔥 Hot</button>
-                <button class="filter-btn" data-filter="new">✨ New</button>
-                <button class="filter-btn" data-filter="ending">⏰ Ending Soon</button>
-            </div>
-            <div class="owner-access-panel" id="ownerAccessPanel">
-                <h3>Owner Access</h3>
-                <p id="ownerAccessStatus">Only owner login can manage products, promotions, and ad settings.</p>
-                <form class="owner-form" id="ownerSetupForm">
-                    <input type="password" id="ownerPasswordSetup" placeholder="Set owner password" minlength="6" required>
-                    <input type="password" id="ownerPasswordSetupConfirm" placeholder="Confirm owner password" minlength="6" required>
-                    <button type="submit" class="btn btn-primary">Set Owner Password</button>
-                </form>
-                <form class="owner-form" id="ownerLoginForm">
-                    <input type="password" id="ownerPasswordLogin" placeholder="Enter owner password" required>
-                    <button type="submit" class="btn btn-primary">Unlock Management</button>
-                </form>
-                <button class="btn btn-secondary" id="ownerLogoutBtn" type="button">Lock Management</button>
-            </div>
-            <div class="product-manager hidden" id="productManager">
-                <h3>Manage Affiliate Products</h3>
-                <p>Add, edit, and delete affiliate products (including Amazon links) directly on this page.</p>
-                <form class="product-form" id="productForm">
-                    <input type="hidden" id="productId">
-                    <input type="text" id="productBrand" placeholder="Brand (e.g., Amazon Basics)" required>
-                    <input type="text" id="productTitle" placeholder="Product Title" required>
-                    <input type="text" id="productDescription" placeholder="Short Description" required>
-                    <select id="productCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="fashion">Fashion</option>
-                        <option value="home">Home & Living</option>
-                        <option value="health">Health & Fitness</option>
-                        <option value="beauty">Beauty</option>
-                        <option value="travel">Travel</option>
-                    </select>
-                    <select id="productBadge" required>
-                        <option value="">Select Badge</option>
-                        <option value="hot">🔥 Hot</option>
-                        <option value="new">✨ New</option>
-                        <option value="ending">⏰ Ending Soon</option>
-                    </select>
-                    <input type="text" id="productIcon" placeholder="Icon (emoji, e.g., 📦)" maxlength="20" required>
-                    <input type="number" id="productCurrentPrice" placeholder="Current Price (e.g., 49.99)" min="0" step="0.01" required>
-                    <input type="number" id="productOriginalPrice" placeholder="Original Price (e.g., 89.99)" min="0" step="0.01" required>
-                    <input type="url" id="productAffiliateUrl" placeholder="Affiliate URL (https://...)" required>
-                    <input type="text" id="productExpires" placeholder="Expiry label (e.g., 2 days left)" required>
-                    <button type="submit" class="btn btn-primary" id="productSubmitBtn">Save Product</button>
-                    <button type="button" class="btn btn-secondary" id="productCancelEditBtn">Cancel Edit</button>
-                    <button type="button" class="btn btn-secondary" id="resetDealsBtn">Reset to Default Deals</button>
-                </form>
-            </div>
-            <div class="site-settings hidden" id="siteSettings">
-                <h3>Promotion & Ads Settings</h3>
-                <p>Manage promotion banner content and ad visibility directly from the website.</p>
-                <form class="settings-form" id="siteSettingsForm">
-                    <input type="text" id="promoHeadingInput" placeholder="Promo heading" required>
-                    <input type="text" id="promoTextInput" placeholder="Promo text" required>
-                    <input type="text" id="promoCtaTextInput" placeholder="Promo button text" required>
-                    <input type="text" id="promoCtaUrlInput" placeholder="Promo button URL (https://... or #deals)" required>
-                    <label class="settings-checkbox">
-                        <input type="checkbox" id="promoEnabledInput">
-                        Show promotion banner
+                <form class="contact-form" id="inquiryForm">
+                    <h3>Partnership Inquiry</h3>
+                    <label>
+                        Name
+                        <input type="text" id="inquiryName" required>
                     </label>
-                    <input type="text" id="adsClientInput" placeholder="AdSense client id (ca-pub-...)" required>
-                    <input type="text" id="adsSlotInput" placeholder="Ad slot id" required>
-                    <label class="settings-checkbox">
-                        <input type="checkbox" id="adsEnabledInput">
-                        Show ads section
+                    <label>
+                        Email
+                        <input type="email" id="inquiryEmail" required>
                     </label>
-                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <label>
+                        Message
+                        <textarea id="inquiryMessage" rows="4" required></textarea>
+                    </label>
+                    <button class="btn btn-primary" type="submit">Send Inquiry</button>
                 </form>
             </div>
-            <div class="deals-grid" id="dealsGrid">
-                <!-- Deals will be dynamically inserted here -->
-            </div>
-            <div class="deals-cta">
-                <a href="#newsletter" class="btn btn-primary">Get More Deals</a>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <section class="ad-slot-section" id="ad-slot">
-        <div class="container">
-            <div class="section-header">
-                <h2>Sponsored Offers</h2>
-                <p>Google ads can appear below after you replace the publisher and slot IDs.</p>
-            </div>
-            <ins id="adsDisplay" class="adsbygoogle ad-slot"
-                 style="display:block"
-                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                 data-ad-slot="1234567890"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <h2>How It Works</h2>
-                <p>Saving money has never been easier</p>
-            </div>
-            <div class="steps-grid">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-icon">🔍</div>
-                    <h3>Browse Deals</h3>
-                    <p>Explore our curated collection of deals across multiple categories and brands.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-icon">🎯</div>
-                    <h3>Choose Your Favorite</h3>
-                    <p>Find the perfect deal that matches your needs and preferences.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-icon">🛒</div>
-                    <h3>Shop & Save</h3>
-                    <p>Click through to the retailer's site and enjoy your exclusive discount.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-icon">🎉</div>
-                    <h3>Enjoy Your Savings</h3>
-                    <p>Receive your products and celebrate the money you saved!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <h2>What Our Users Say</h2>
-                <p>Real experiences from real savers</p>
-            </div>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"I saved over $500 last month alone! DealHub has completely changed how I shop online. The deals are always genuine and easy to use."</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">SK</div>
-                        <div class="author-info">
-                            <strong>Sarah K.</strong>
-                            <span>Verified Shopper</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"The best part is that all the deals actually work! I've tried other sites before, but DealHub is by far the most reliable."</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">MJ</div>
-                        <div class="author-info">
-                            <strong>Michael J.</strong>
-                            <span>Verified Shopper</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"Love the variety of categories! From tech to fashion, I can find great deals on everything I need. Highly recommend!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">EP</div>
-                        <div class="author-info">
-                            <strong>Emily P.</strong>
-                            <span>Verified Shopper</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Newsletter Section -->
-    <section class="newsletter" id="newsletter">
-        <div class="container">
-            <div class="newsletter-content">
-                <h2>Never Miss a Deal!</h2>
-                <p>Subscribe to our newsletter and get exclusive deals delivered straight to your inbox.</p>
-                <form class="newsletter-form" id="newsletterForm">
-                    <input type="email" placeholder="Enter your email address" required>
-                    <button type="submit" class="btn btn-primary">Subscribe</button>
-                </form>
-                <p class="newsletter-note">🔒 We respect your privacy. Unsubscribe anytime.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="contact" id="contact">
-        <div class="container">
-            <div class="section-header">
-                <h2>Get In Touch</h2>
-                <p>Have questions or want to partner with us?</p>
-            </div>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div>
-                            <h4>Email Us</h4>
-                             <p>hello@kasireddideals.com</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">💬</div>
-                        <div>
-                            <h4>Live Chat</h4>
-                            <p>Available 24/7</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📱</div>
-                        <div>
-                            <h4>Follow Us</h4>
-                            <div class="social-links">
-                                <a href="#" aria-label="Facebook">FB</a>
-                                <a href="#" aria-label="Twitter">TW</a>
-                                <a href="#" aria-label="Instagram">IG</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <form class="contact-form" id="contactForm">
-                    <input type="text" placeholder="Your Name" required>
-                    <input type="email" placeholder="Your Email" required>
-                    <select required>
-                        <option value="">Select Subject</option>
-                        <option value="general">General Inquiry</option>
-                        <option value="partnership">Partnership</option>
-                        <option value="support">Support</option>
-                        <option value="feedback">Feedback</option>
-                    </select>
-                    <textarea placeholder="Your Message" rows="4" required></textarea>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="#" class="logo">
-                        <span class="logo-icon">🎯</span>
-                        <span class="logo-text">Kasireddi's Deals Hub</span>
-                    </a>
-                    <p>Your trusted partner for finding the best deals and saving money on quality products.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#categories">Categories</a></li>
-                        <li><a href="#deals">Deals</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Categories</h4>
-                    <ul>
-                        <li><a href="#">Electronics</a></li>
-                        <li><a href="#">Fashion</a></li>
-                        <li><a href="#">Home & Living</a></li>
-                        <li><a href="#">Health & Fitness</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="#contact">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                    </ul>
-                </div>
+        <div class="container footer-wrap">
+            <div>
+                <h3 id="footerBrandTitle">Kasireddi Deals</h3>
+                <p>Official affiliate marketplace with curated product listings and promotions.</p>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Kasireddi's Deals Hub. All rights reserved.</p>
-                <p>Affiliate Disclosure: We may earn commissions from purchases made through links on this site, including qualifying purchases from Amazon.</p>
+            <div>
+                <p id="footerYear"></p>
+                <p>Affiliate disclosure: We may earn commissions from qualifying purchases through listed partner links.</p>
             </div>
         </div>
     </footer>
 
+    <aside class="dev-modal hidden" id="devModal" aria-hidden="true">
+        <div class="dev-backdrop" id="devBackdrop"></div>
+        <div class="dev-dialog" role="dialog" aria-modal="true" aria-label="Developer Access">
+            <button class="dev-close" type="button" id="devCloseBtn" aria-label="Close admin">x</button>
+
+            <div class="dev-header">
+                <p class="section-kicker">Developer Mode</p>
+                <h2>Private Owner Console</h2>
+                <p class="dev-note">Cloud-authenticated admin panel for secure production operations.</p>
+            </div>
+
+            <div class="owner-access-panel">
+                <h3>Owner Authentication</h3>
+                <p id="ownerAccessStatus">Sign in with your authorized owner account.</p>
+                <form class="owner-form" id="ownerLoginForm">
+                    <input type="email" id="ownerEmailLogin" placeholder="Owner email" autocomplete="username" required>
+                    <input type="password" id="ownerPasswordLogin" placeholder="Owner password" autocomplete="current-password" required>
+                    <button class="btn btn-primary" type="submit">Sign In</button>
+                </form>
+                <div class="form-actions">
+                    <button class="btn btn-outline hidden" id="ownerLogoutBtn" type="button">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="admin-dashboard hidden" id="adminDashboard">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="products" type="button">Products</button>
+                    <button class="admin-tab" data-tab="promotion" type="button">Promotion</button>
+                    <button class="admin-tab" data-tab="site" type="button">Site</button>
+                    <button class="admin-tab" data-tab="ads" type="button">Ads</button>
+                    <button class="admin-tab" data-tab="backup" type="button">Backup</button>
+                </div>
+
+                <div class="admin-panel active" id="panel-products">
+                    <h3>Manage Listings</h3>
+                    <form class="admin-form" id="productForm">
+                        <input type="hidden" id="productId">
+                        <label>
+                            Brand
+                            <input type="text" id="productBrand" required>
+                        </label>
+                        <label>
+                            Product Title
+                            <input type="text" id="productTitle" required>
+                        </label>
+                        <label>
+                            Category
+                            <select id="productCategory" required>
+                                <option value="">Select category</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="fashion">Fashion</option>
+                                <option value="home">Home and Kitchen</option>
+                                <option value="health">Health and Fitness</option>
+                                <option value="beauty">Beauty</option>
+                                <option value="travel">Travel</option>
+                            </select>
+                        </label>
+                        <label>
+                            Tag
+                            <select id="productBadge" required>
+                                <option value="">Select tag</option>
+                                <option value="hot">Hot</option>
+                                <option value="new">New</option>
+                                <option value="festival">Festival</option>
+                                <option value="price-drop">Price Drop</option>
+                            </select>
+                        </label>
+                        <label>
+                            List Price (INR)
+                            <input type="number" id="productListPrice" min="1" step="1" required>
+                        </label>
+                        <label>
+                            Deal Price (INR)
+                            <input type="number" id="productDealPrice" min="1" step="1" required>
+                        </label>
+                        <label>
+                            Coupon (optional)
+                            <input type="text" id="productCoupon" placeholder="SAVE10">
+                        </label>
+                        <label>
+                            Expires On
+                            <input type="date" id="productExpires" required>
+                        </label>
+                        <label>
+                            Affiliate URL (optional)
+                            <input type="url" id="productAffiliateUrl" placeholder="https://">
+                        </label>
+                        <label>
+                            Product Image URL (optional)
+                            <input type="url" id="productImageUrl" placeholder="https://">
+                        </label>
+                        <label class="full">
+                            Product Note
+                            <input type="text" id="productNote" placeholder="Short summary for card" required>
+                        </label>
+                        <label class="checkbox-field full">
+                            <input type="checkbox" id="productFeatured">
+                            Mark as featured
+                        </label>
+                        <div class="form-actions full">
+                            <button class="btn btn-primary" id="productSubmitBtn" type="submit">Save Product</button>
+                            <button class="btn btn-outline" id="productCancelEditBtn" type="button">Cancel Edit</button>
+                            <button class="btn btn-outline" id="resetDealsBtn" type="button">Reset Templates</button>
+                        </div>
+                    </form>
+
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Prices</th>
+                                    <th>Link</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminProductsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-panel" id="panel-promotion">
+                    <h3>Promotion Banner</h3>
+                    <form class="admin-form" id="promotionForm">
+                        <label>
+                            Promo Label
+                            <input type="text" id="promoLabelInput" required>
+                        </label>
+                        <label>
+                            Promo Heading
+                            <input type="text" id="promoHeadingInput" required>
+                        </label>
+                        <label class="full">
+                            Promo Text
+                            <input type="text" id="promoTextInput" required>
+                        </label>
+                        <label>
+                            Button Text
+                            <input type="text" id="promoCtaTextInput" required>
+                        </label>
+                        <label>
+                            Button URL
+                            <input type="text" id="promoCtaUrlInput" placeholder="#best-deals or https://" required>
+                        </label>
+                        <label class="checkbox-field full">
+                            <input type="checkbox" id="promoEnabledInput">
+                            Show promotion banner
+                        </label>
+                        <div class="form-actions full">
+                            <button class="btn btn-primary" type="submit">Save Promotion</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel" id="panel-site">
+                    <h3>Site Settings</h3>
+                    <form class="admin-form" id="siteSettingsForm">
+                        <label>
+                            Site Title
+                            <input type="text" id="siteTitleInput" required>
+                        </label>
+                        <label>
+                            Hero Title
+                            <input type="text" id="heroTitleInput" required>
+                        </label>
+                        <label class="full">
+                            Hero Subtitle
+                            <input type="text" id="heroSubtitleInput" required>
+                        </label>
+                        <label>
+                            Private Owner Email
+                            <input type="email" id="privateEmailInput" required>
+                        </label>
+                        <label>
+                            WhatsApp Link (optional)
+                            <input type="url" id="whatsAppInput" placeholder="https://wa.me/XXXXXXXXXX">
+                        </label>
+                        <div class="form-actions full">
+                            <button class="btn btn-primary" type="submit">Save Site</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel" id="panel-ads">
+                    <h3>Ads Settings</h3>
+                    <form class="admin-form" id="adsSettingsForm">
+                        <label>
+                            Ads Heading
+                            <input type="text" id="adsHeadingInput" required>
+                        </label>
+                        <label>
+                            AdSense Client ID
+                            <input type="text" id="adsClientInput" placeholder="ca-pub-..." required>
+                        </label>
+                        <label>
+                            Ad Slot ID
+                            <input type="text" id="adsSlotInput" required>
+                        </label>
+                        <label class="full">
+                            Disclaimer
+                            <input type="text" id="adsDisclaimerInput" required>
+                        </label>
+                        <label class="checkbox-field full">
+                            <input type="checkbox" id="adsEnabledInput">
+                            Show ads section
+                        </label>
+                        <div class="form-actions full">
+                            <button class="btn btn-primary" type="submit">Save Ads</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel" id="panel-backup">
+                    <h3>Backup</h3>
+                    <div class="backup-grid">
+                        <button class="btn btn-primary" id="exportDataBtn" type="button">Export Data</button>
+                        <input type="file" id="importDataInput" accept="application/json">
+                        <button class="btn btn-outline" id="importDataBtn" type="button">Import Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script src="firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

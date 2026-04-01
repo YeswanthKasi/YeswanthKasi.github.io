@@ -1,56 +1,96 @@
-# Kasireddi's Deals Hub - Affiliate Marketing Website
+# Kasireddi Deals - Production Secure Version
 
-A modern, responsive affiliate marketing website for promoting products and deals across various categories.
+This version is upgraded from local-only admin controls to cloud-secure owner management using Firebase Authentication and Firestore.
 
-## Features
+## Production Security Architecture
 
-- **Responsive Design**: Fully responsive layout that works on desktop, tablet, and mobile devices
-- **Modern UI/UX**: Clean and professional design with smooth animations
-- **Category Browsing**: Browse deals by category (Electronics, Fashion, Home, Health, Beauty, Travel)
-- **Deal Filtering**: Filter deals by Hot, New, or Ending Soon
-- **Affiliate Product Manager**: Add and list your own affiliate products directly from the website
-- **Newsletter Signup**: Capture visitor emails for marketing campaigns
-- **Contact Form**: Allow visitors and potential partners to get in touch
-- **SEO Friendly**: Includes meta tags for better search engine visibility
-- **AdSense Ready**: Google AdSense placeholders included for monetization setup
+- Owner login is validated by Firebase Auth.
+- Product and site data are stored in Firestore (cloud, cross-device).
+- Write operations are protected by Firestore rules in [firestore.rules](firestore.rules).
+- Public users can read listings, but only authenticated owner can create/update/delete.
+- Admin UI remains hidden from public entry and is also backend-protected.
 
-## Sections
+## Secret Developer Entry (UI Access)
 
-1. **Hero Section** - Eye-catching introduction with statistics
-2. **About Section** - Information about the platform
-3. **Categories** - Browse deals by product category
-4. **Featured Deals** - Showcase of current best deals
-5. **How It Works** - Simple steps explaining the process
-6. **Testimonials** - Social proof from happy customers
-7. **Newsletter** - Email subscription form
-8. **Contact** - Contact form and information
-9. **Footer** - Links and affiliate disclosure
+Admin UI is hidden visually and can be opened via:
 
-## Technology Stack
+1. Press Ctrl + Shift + D
+2. Type kasireddi on the page
+3. Tap KD logo 5 times quickly
+4. Open with hash once: /#dev-kd
 
-- HTML5
-- CSS3 (Custom properties, Flexbox, Grid, Animations)
-- Vanilla JavaScript (No dependencies)
-- Google Fonts (Inter)
+Important: UI hiding is only convenience. Actual security is enforced by Firebase Auth + Firestore rules.
 
-## Setup
+## Files
 
-Simply deploy to any static hosting service. The website is hosted at:
-- GitHub Pages: https://yeswanthkasi.github.io
-- Custom Domain: https://kasireddiyeswanth.me
+- [index.html](index.html): Public site + hidden secure admin modal
+- [styles.css](styles.css): Production UI and responsive design
+- [script.js](script.js): Cloud-auth app logic and admin operations
+- [firebase-config.js](firebase-config.js): Active config file loaded by the website
+- [firebase-config.example.js](firebase-config.example.js): Template to fill with your Firebase values
+- [firestore.rules](firestore.rules): Backend access policy
 
-## Customization
+## Firebase Setup (Required)
 
-To add your own affiliate links:
-1. Use the **Add Affiliate Product** form in the Deals section on the website
-2. Enter your product details and paste your affiliate URL (Amazon links are supported)
-3. New products are saved in browser local storage and rendered in the deals grid
+1. Create Firebase project.
+2. Enable Authentication -> Email/Password.
+3. Create owner account in Auth using your email.
+4. Get owner UID from Firebase Authentication users table.
+5. Enable Firestore database in production mode.
+6. Deploy rules from [firestore.rules](firestore.rules) after replacing YOUR_OWNER_UID.
+7. Copy [firebase-config.example.js](firebase-config.example.js) values into [firebase-config.js](firebase-config.js).
 
-To configure Google AdSense:
-1. Open `index.html`
-2. Replace `ca-pub-XXXXXXXXXXXXXXXX` with your real AdSense publisher ID
-3. Replace `data-ad-slot="1234567890"` with your ad slot ID
+## Firestore Rules Deployment
 
-## License
+Use Firebase CLI:
 
-© 2024 DealHub. All rights reserved.
+```bash
+firebase login
+firebase init firestore
+firebase deploy --only firestore:rules
+```
+
+Before deploy, replace YOUR_OWNER_UID in [firestore.rules](firestore.rules).
+
+## Data Model
+
+- Collection products
+  - One document per product listing
+- Document site/main
+  - Site branding, promo banner, and ads settings
+
+## Local Run
+
+Serve with any static server:
+
+```bash
+npx http-server . -p 5500 -c-1
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5500
+```
+
+## GitHub Pages Deploy
+
+1. Push repository to GitHub.
+2. Open repository Settings -> Pages.
+3. Set source to branch/root.
+4. Save and wait for deployment.
+
+## AdSense Setup
+
+In secure admin panel -> Ads tab:
+
+1. Set client ID (ca-pub-...)
+2. Set slot ID
+3. Save settings
+
+## Security Notes
+
+- Never commit real secrets outside what is needed for Firebase public web config.
+- Firebase web config is expected to be public; security is in Firestore rules and Auth.
+- Keep owner UID locked in rules and require verified email.
+- For even stronger enterprise control, add Cloud Functions for server-side validation/audit logging.

@@ -1,161 +1,260 @@
-const defaultDealsData = [
+const encodedOwnerEmail = "S2FzaXJlZGRpeWVzd2FudGgyOUBnbWFpbC5jb20=";
+
+const categories = ["electronics", "fashion", "home", "health", "beauty", "travel"];
+const badges = ["hot", "new", "festival", "price-drop"];
+
+const defaultProducts = [
     {
-        id: 1,
-        brand: "TechGadgets",
-        title: "Wireless Noise-Canceling Headphones",
-        description: "Premium sound quality with 30-hour battery life",
-        currentPrice: 149.99,
-        originalPrice: 299.99,
-        discount: "50% OFF",
-        badge: "hot",
+        id: "p-3001",
+        brand: "Amazon Basics",
+        title: "Laptop Sleeve 15.6 inch",
         category: "electronics",
-        icon: "🎧",
-        expires: "3 days left",
-        affiliateUrl: "https://www.amazon.com/"
+        badge: "new",
+        listPrice: 1299,
+        dealPrice: 899,
+        coupon: "",
+        expiresOn: "2026-12-31",
+        affiliateUrl: "",
+        imageUrl: "",
+        note: "Lightweight sleeve with extra front pocket.",
+        featured: true,
+        createdAt: 1743100001000,
+        updatedAt: 1743100001000
     },
     {
-        id: 2,
-        brand: "FashionHub",
-        title: "Designer Summer Collection",
-        description: "Trendy styles for the modern wardrobe",
-        currentPrice: 79.99,
-        originalPrice: 159.99,
-        discount: "50% OFF",
-        badge: "new",
+        id: "p-3002",
+        brand: "Puma",
+        title: "Running Shoes",
         category: "fashion",
-        icon: "👗",
-        expires: "5 days left",
-        affiliateUrl: "https://www.amazon.com/"
+        badge: "hot",
+        listPrice: 4999,
+        dealPrice: 2999,
+        coupon: "",
+        expiresOn: "2026-11-20",
+        affiliateUrl: "",
+        imageUrl: "",
+        note: "Everyday comfort running shoe for long use.",
+        featured: false,
+        createdAt: 1743100002000,
+        updatedAt: 1743100002000
     },
     {
-        id: 3,
-        brand: "HomeEssentials",
-        title: "Smart Home Starter Kit",
-        description: "Transform your home with smart devices",
-        currentPrice: 199.99,
-        originalPrice: 399.99,
-        discount: "50% OFF",
-        badge: "hot",
+        id: "p-3003",
+        brand: "Prestige",
+        title: "Nonstick Cookware Set",
         category: "home",
-        icon: "🏠",
-        expires: "2 days left",
-        affiliateUrl: "https://www.amazon.com/"
-    },
-    {
-        id: 4,
-        brand: "FitLife",
-        title: "Premium Fitness Tracker",
-        description: "Track your health goals with precision",
-        currentPrice: 89.99,
-        originalPrice: 179.99,
-        discount: "50% OFF",
-        badge: "new",
-        category: "health",
-        icon: "⌚",
-        expires: "7 days left",
-        affiliateUrl: "https://www.amazon.com/"
-    },
-    {
-        id: 5,
-        brand: "BeautyBox",
-        title: "Luxury Skincare Bundle",
-        description: "Complete skincare routine essentials",
-        currentPrice: 129.99,
-        originalPrice: 259.99,
-        discount: "50% OFF",
-        badge: "ending",
-        category: "beauty",
-        icon: "💆",
-        expires: "1 day left",
-        affiliateUrl: "https://www.amazon.com/"
-    },
-    {
-        id: 6,
-        brand: "TravelMore",
-        title: "Exclusive Hotel Deals",
-        description: "5-star accommodations at budget prices",
-        currentPrice: 299.99,
-        originalPrice: 599.99,
-        discount: "50% OFF",
-        badge: "hot",
-        category: "travel",
-        icon: "🏨",
-        expires: "4 days left",
-        affiliateUrl: "https://www.amazon.com/"
+        badge: "festival",
+        listPrice: 5599,
+        dealPrice: 3699,
+        coupon: "",
+        expiresOn: "2026-10-15",
+        affiliateUrl: "",
+        imageUrl: "",
+        note: "Daily cooking bundle for home kitchen.",
+        featured: true,
+        createdAt: 1743100003000,
+        updatedAt: 1743100003000
     }
 ];
 
-const defaultSiteSettings = {
-    promoHeading: "Today’s Featured Promotion",
-    promoText: "Discover special affiliate offers handpicked by Kasireddi Deals.",
-    promoCtaText: "View Promotion",
-    promoCtaUrl: "#deals",
-    promoEnabled: true,
-    adsClient: "ca-pub-XXXXXXXXXXXXXXXX",
-    adsSlot: "1234567890",
-    adsEnabled: true
+const defaultSettings = {
+    site: {
+        siteTitle: "Kasireddi Deals",
+        heroTitle: "Kasireddi Deals: Official Hub for Smart Daily Savings",
+        heroSubtitle: "Premium product discovery experience with trusted listings, clean categories, and continuously updated offers.",
+        privateEmail: decodePrivateEmail(),
+        whatsAppLink: ""
+    },
+    promo: {
+        enabled: true,
+        label: "Seasonal Picks",
+        heading: "Fresh India Deal Drops Are Live",
+        text: "Discover trending products and save more with curated daily offers.",
+        ctaText: "View Promotions",
+        ctaUrl: "#best-deals"
+    },
+    ads: {
+        enabled: true,
+        heading: "Sponsored Offers",
+        disclaimer: "Ads are managed securely by site owner.",
+        client: "ca-pub-6185830543809180",
+        slot: "1234567890"
+    }
 };
 
-const storageKeys = {
-    deals: "kasireddiManagedDeals",
-    ownerHash: "kasireddiOwnerHash",
-    settings: "kasireddiSiteSettings",
-    ownerSession: "kasireddiOwnerUnlocked"
+const localFallbackKeys = {
+    products: "kasireddiLocalFallbackProducts",
+    settings: "kasireddiLocalFallbackSettings"
 };
 
-let dealsData = JSON.parse(JSON.stringify(defaultDealsData));
-let siteSettings = { ...defaultSiteSettings };
-let ownerUnlocked = false;
-let adsInitialized = false;
-let nextDealId = 1;
+const state = {
+    products: clone(defaultProducts),
+    settings: clone(defaultSettings),
+    ownerUnlocked: false,
+    adsInitialized: false,
+    devModalOpen: false,
+    typedSecretBuffer: "",
+    cloudReady: false,
+    activeOwnerEmail: ""
+};
 
-const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-const navLinks = document.getElementById("navLinks");
-const navbar = document.getElementById("navbar");
-const dealsGrid = document.getElementById("dealsGrid");
-const filterBtns = document.querySelectorAll(".filter-btn");
-const newsletterForm = document.getElementById("newsletterForm");
-const contactForm = document.getElementById("contactForm");
-const productForm = document.getElementById("productForm");
-const productSubmitBtn = document.getElementById("productSubmitBtn");
-const productCancelEditBtn = document.getElementById("productCancelEditBtn");
-const resetDealsBtn = document.getElementById("resetDealsBtn");
+const cloud = {
+    app: null,
+    auth: null,
+    db: null,
+    ownerUid: "",
+    ownerEmail: decodePrivateEmail(),
+    requireEmailVerified: true,
+    unsubscribeProducts: null,
+    unsubscribeSettings: null,
 
-const ownerSetupForm = document.getElementById("ownerSetupForm");
-const ownerLoginForm = document.getElementById("ownerLoginForm");
-const ownerLogoutBtn = document.getElementById("ownerLogoutBtn");
-const ownerAccessStatus = document.getElementById("ownerAccessStatus");
-const productManager = document.getElementById("productManager");
-const siteSettingsPanel = document.getElementById("siteSettings");
+    initializeApp: null,
+    getAuth: null,
+    onAuthStateChanged: null,
+    signInWithEmailAndPassword: null,
+    signOut: null,
+    setPersistence: null,
+    browserLocalPersistence: null,
 
-const siteSettingsForm = document.getElementById("siteSettingsForm");
-const promoBanner = document.getElementById("promoBanner");
-const promoHeading = document.getElementById("promoHeading");
-const promoText = document.getElementById("promoText");
-const promoCta = document.getElementById("promoCta");
-const adSlotSection = document.getElementById("ad-slot");
-const adsDisplay = document.getElementById("adsDisplay");
+    getFirestore: null,
+    doc: null,
+    setDoc: null,
+    updateDoc: null,
+    deleteDoc: null,
+    getDocs: null,
+    writeBatch: null,
+    collection: null,
+    query: null,
+    orderBy: null,
+    onSnapshot: null
+};
 
-function showToast(message, type = "success") {
-    const existingToast = document.querySelector(".toast-notification");
-    if (existingToast) existingToast.remove();
+const elements = {
+    navbar: document.getElementById("navbar"),
+    mobileMenuBtn: document.getElementById("mobileMenuBtn"),
+    navLinks: document.getElementById("navLinks"),
+    brandSecretTap: document.getElementById("brandSecretTap"),
 
-    const toast = document.createElement("div");
-    toast.className = `toast-notification toast-${type}`;
-    toast.innerHTML = `
-        <span class="toast-icon">${type === "success" ? "✓" : "ℹ"}</span>
-        <span class="toast-message">${escapeHtml(message)}</span>
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.classList.add("show"), 10);
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    navBrandTitle: document.getElementById("navBrandTitle"),
+    footerBrandTitle: document.getElementById("footerBrandTitle"),
+    footerYear: document.getElementById("footerYear"),
+
+    heroTitle: document.getElementById("heroTitle"),
+    heroSubtitle: document.getElementById("heroSubtitle"),
+    metricProducts: document.getElementById("metricProducts"),
+    metricSavings: document.getElementById("metricSavings"),
+    metricCategories: document.getElementById("metricCategories"),
+
+    promoRibbon: document.getElementById("promoRibbon"),
+    promoLabel: document.getElementById("promoLabel"),
+    promoHeading: document.getElementById("promoHeading"),
+    promoText: document.getElementById("promoText"),
+    promoCta: document.getElementById("promoCta"),
+
+    searchInput: document.getElementById("searchInput"),
+    categoryFilter: document.getElementById("categoryFilter"),
+    badgeFilter: document.getElementById("badgeFilter"),
+    sortFilter: document.getElementById("sortFilter"),
+    dealsGrid: document.getElementById("dealsGrid"),
+    dealsEmpty: document.getElementById("dealsEmpty"),
+
+    adsSection: document.getElementById("adsSection"),
+    adsDisplay: document.getElementById("adsDisplay"),
+    adsHeading: document.getElementById("adsHeading"),
+    adsDisclaimer: document.getElementById("adsDisclaimer"),
+
+    inquiryForm: document.getElementById("inquiryForm"),
+
+    devModal: document.getElementById("devModal"),
+    devBackdrop: document.getElementById("devBackdrop"),
+    devCloseBtn: document.getElementById("devCloseBtn"),
+
+    ownerLoginForm: document.getElementById("ownerLoginForm"),
+    ownerEmailLogin: document.getElementById("ownerEmailLogin"),
+    ownerPasswordLogin: document.getElementById("ownerPasswordLogin"),
+    ownerLogoutBtn: document.getElementById("ownerLogoutBtn"),
+    ownerAccessStatus: document.getElementById("ownerAccessStatus"),
+    adminDashboard: document.getElementById("adminDashboard"),
+
+    adminTabs: Array.from(document.querySelectorAll(".admin-tab")),
+    adminPanels: Array.from(document.querySelectorAll(".admin-panel")),
+
+    productForm: document.getElementById("productForm"),
+    productSubmitBtn: document.getElementById("productSubmitBtn"),
+    productCancelEditBtn: document.getElementById("productCancelEditBtn"),
+    resetDealsBtn: document.getElementById("resetDealsBtn"),
+    adminProductsTableBody: document.getElementById("adminProductsTableBody"),
+
+    promotionForm: document.getElementById("promotionForm"),
+    siteSettingsForm: document.getElementById("siteSettingsForm"),
+    adsSettingsForm: document.getElementById("adsSettingsForm"),
+
+    exportDataBtn: document.getElementById("exportDataBtn"),
+    importDataInput: document.getElementById("importDataInput"),
+    importDataBtn: document.getElementById("importDataBtn")
+};
+
+function decodePrivateEmail() {
+    try {
+        return atob(encodedOwnerEmail);
+    } catch (_error) {
+        return "owner@domain.com";
+    }
 }
 
-function escapeHtml(value) {
-    return String(value)
+function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function showToast(message, type = "success") {
+    const oldToast = document.querySelector(".toast");
+    if (oldToast) oldToast.remove();
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3200);
+}
+
+function normalizeTimestamp(value) {
+    if (Number.isFinite(value)) return value;
+    if (value && typeof value.toMillis === "function") return value.toMillis();
+    if (typeof value === "string") {
+        const parsed = Date.parse(value);
+        return Number.isNaN(parsed) ? Date.now() : parsed;
+    }
+    return Date.now();
+}
+
+function safeExternalUrl(raw) {
+    if (typeof raw !== "string") return "";
+    const value = raw.trim();
+    if (!value) return "";
+    try {
+        const parsed = new URL(value);
+        if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+            return parsed.toString();
+        }
+    } catch (_error) {
+        return "";
+    }
+    return "";
+}
+
+function safeActionUrl(raw) {
+    if (typeof raw !== "string") return "";
+    const value = raw.trim();
+    if (!value) return "";
+    if (value.startsWith("#")) {
+        return document.querySelector(value) ? value : "";
+    }
+    return safeExternalUrl(value);
+}
+
+function escapeHTML(raw) {
+    return String(raw)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -163,548 +262,1129 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
-function safeURL(url) {
-    if (typeof url !== "string") return null;
-    if (url.startsWith("#")) return url;
-    try {
-        const parsed = new URL(url);
-        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-            return parsed.toString();
-        }
-    } catch (_error) {
-        return null;
-    }
-    return null;
+function parsePrice(raw) {
+    const numeric = Number(raw);
+    return Number.isFinite(numeric) ? Math.round(numeric) : NaN;
 }
 
-async function hashPassword(password) {
-    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-        const encoded = new TextEncoder().encode(password);
-        const digest = await window.crypto.subtle.digest("SHA-256", encoded);
-        return Array.from(new Uint8Array(digest))
-            .map((value) => value.toString(16).padStart(2, "0"))
-            .join("");
-    }
-    return null;
+function money(value) {
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0
+    }).format(value);
 }
 
-function normalizeDeal(raw) {
-    if (!raw || typeof raw !== "object") return null;
-    if (
-        typeof raw.id !== "number" ||
-        typeof raw.brand !== "string" ||
-        typeof raw.title !== "string" ||
-        typeof raw.description !== "string" ||
-        typeof raw.discount !== "string" ||
-        typeof raw.badge !== "string" ||
-        typeof raw.category !== "string" ||
-        typeof raw.icon !== "string" ||
-        typeof raw.expires !== "string" ||
-        typeof raw.currentPrice !== "number" ||
-        typeof raw.originalPrice !== "number" ||
-        typeof raw.affiliateUrl !== "string"
-    ) {
-        return null;
-    }
+function discountPercent(product) {
+    return Math.max(Math.round(((product.listPrice - product.dealPrice) / product.listPrice) * 100), 0);
+}
 
-    if (raw.currentPrice <= 0 || raw.originalPrice <= 0 || raw.currentPrice >= raw.originalPrice) return null;
-    if (!safeURL(raw.affiliateUrl)) return null;
+function formatDate(raw) {
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return "No expiry";
+    return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
 
-    return {
-        id: raw.id,
-        brand: raw.brand,
-        title: raw.title,
-        description: raw.description,
-        currentPrice: raw.currentPrice,
-        originalPrice: raw.originalPrice,
-        discount: raw.discount,
-        badge: raw.badge,
-        category: raw.category,
-        icon: raw.icon,
-        expires: raw.expires,
-        affiliateUrl: raw.affiliateUrl
+function daysUntil(raw) {
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return Number.POSITIVE_INFINITY;
+    return Math.max(Math.ceil((date.getTime() - Date.now()) / 86400000), 0);
+}
+
+function categoryLabel(value) {
+    const map = {
+        electronics: "Electronics",
+        fashion: "Fashion",
+        home: "Home and Kitchen",
+        health: "Health and Fitness",
+        beauty: "Beauty",
+        travel: "Travel"
     };
+    return map[value] || value;
 }
 
-function saveManagedDeals() {
-    localStorage.setItem(storageKeys.deals, JSON.stringify(dealsData));
+function badgeLabel(value) {
+    const map = {
+        hot: "Hot",
+        new: "New",
+        festival: "Festival",
+        "price-drop": "Price Drop"
+    };
+    return map[value] || value;
 }
 
-function loadManagedDeals() {
-    try {
-        const saved = localStorage.getItem(storageKeys.deals);
-        if (!saved) return;
-        const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) return;
-        const normalized = parsed.map(normalizeDeal).filter(Boolean);
-        if (normalized.length > 0) {
-            dealsData = normalized;
-            nextDealId = dealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+function normalizeProduct(raw) {
+    if (!raw || typeof raw !== "object") return null;
+
+    const cleanAffiliateSource = typeof raw.affiliateUrl === "string" ? raw.affiliateUrl.trim() : "";
+    const cleanImageSource = typeof raw.imageUrl === "string" ? raw.imageUrl.trim() : "";
+
+    const product = {
+        id: typeof raw.id === "string" && raw.id ? raw.id : `p-${Date.now()}`,
+        brand: typeof raw.brand === "string" ? raw.brand.trim() : "",
+        title: typeof raw.title === "string" ? raw.title.trim() : "",
+        category: typeof raw.category === "string" ? raw.category.trim() : "",
+        badge: typeof raw.badge === "string" ? raw.badge.trim() : "",
+        listPrice: parsePrice(raw.listPrice),
+        dealPrice: parsePrice(raw.dealPrice),
+        coupon: typeof raw.coupon === "string" ? raw.coupon.trim() : "",
+        expiresOn: typeof raw.expiresOn === "string" ? raw.expiresOn : "",
+        affiliateUrl: cleanAffiliateSource ? safeExternalUrl(cleanAffiliateSource) : "",
+        imageUrl: cleanImageSource ? safeExternalUrl(cleanImageSource) : "",
+        note: typeof raw.note === "string" ? raw.note.trim() : "",
+        featured: Boolean(raw.featured),
+        createdAt: normalizeTimestamp(raw.createdAt),
+        updatedAt: normalizeTimestamp(raw.updatedAt)
+    };
+
+    if (!product.brand || !product.title || !product.note) return null;
+    if (!categories.includes(product.category)) return null;
+    if (!badges.includes(product.badge)) return null;
+    if (!Number.isFinite(product.listPrice) || !Number.isFinite(product.dealPrice)) return null;
+    if (product.listPrice <= 0 || product.dealPrice <= 0 || product.dealPrice >= product.listPrice) return null;
+    if (cleanAffiliateSource && !product.affiliateUrl) return null;
+    if (cleanImageSource && !product.imageUrl) return null;
+
+    const expiryDate = new Date(product.expiresOn);
+    if (Number.isNaN(expiryDate.getTime())) {
+        const fallback = new Date();
+        fallback.setDate(fallback.getDate() + 30);
+        product.expiresOn = fallback.toISOString().slice(0, 10);
+    }
+
+    return product;
+}
+
+function normalizeSettings(raw) {
+    const merged = {
+        site: {
+            ...defaultSettings.site,
+            ...(raw && raw.site ? raw.site : {})
+        },
+        promo: {
+            ...defaultSettings.promo,
+            ...(raw && raw.promo ? raw.promo : {})
+        },
+        ads: {
+            ...defaultSettings.ads,
+            ...(raw && raw.ads ? raw.ads : {})
         }
-    } catch (_error) {
-        showToast("Could not load saved deals. Using defaults.", "info");
-    }
+    };
+
+    merged.site.siteTitle = String(merged.site.siteTitle || defaultSettings.site.siteTitle).trim();
+    merged.site.heroTitle = String(merged.site.heroTitle || defaultSettings.site.heroTitle).trim();
+    merged.site.heroSubtitle = String(merged.site.heroSubtitle || defaultSettings.site.heroSubtitle).trim();
+    merged.site.privateEmail = String(merged.site.privateEmail || defaultSettings.site.privateEmail).trim();
+    merged.site.whatsAppLink = safeExternalUrl(String(merged.site.whatsAppLink || "").trim());
+
+    merged.promo.enabled = Boolean(merged.promo.enabled);
+    merged.promo.label = String(merged.promo.label || defaultSettings.promo.label).trim();
+    merged.promo.heading = String(merged.promo.heading || defaultSettings.promo.heading).trim();
+    merged.promo.text = String(merged.promo.text || defaultSettings.promo.text).trim();
+    merged.promo.ctaText = String(merged.promo.ctaText || defaultSettings.promo.ctaText).trim();
+    merged.promo.ctaUrl = safeActionUrl(String(merged.promo.ctaUrl || defaultSettings.promo.ctaUrl).trim()) || "#best-deals";
+
+    merged.ads.enabled = Boolean(merged.ads.enabled);
+    merged.ads.heading = String(merged.ads.heading || defaultSettings.ads.heading).trim();
+    merged.ads.disclaimer = String(merged.ads.disclaimer || defaultSettings.ads.disclaimer).trim();
+    merged.ads.client = String(merged.ads.client || defaultSettings.ads.client).trim();
+    merged.ads.slot = String(merged.ads.slot || defaultSettings.ads.slot).trim();
+
+    return merged;
 }
 
-function saveSiteSettings() {
-    localStorage.setItem(storageKeys.settings, JSON.stringify(siteSettings));
+function dealInitials(product) {
+    return (product.title || product.brand)
+        .split(" ")
+        .map((chunk) => chunk[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
 }
 
-function loadSiteSettings() {
-    try {
-        const saved = localStorage.getItem(storageKeys.settings);
-        if (!saved) return;
-        const parsed = JSON.parse(saved);
-        siteSettings = { ...defaultSiteSettings, ...parsed };
-    } catch (_error) {
-        showToast("Could not load saved site settings. Using defaults.", "info");
-    }
-}
-
-function updateSettingsForm() {
-    if (!siteSettingsForm) return;
-    siteSettingsForm.querySelector("#promoHeadingInput").value = siteSettings.promoHeading;
-    siteSettingsForm.querySelector("#promoTextInput").value = siteSettings.promoText;
-    siteSettingsForm.querySelector("#promoCtaTextInput").value = siteSettings.promoCtaText;
-    siteSettingsForm.querySelector("#promoCtaUrlInput").value = siteSettings.promoCtaUrl;
-    siteSettingsForm.querySelector("#promoEnabledInput").checked = Boolean(siteSettings.promoEnabled);
-    siteSettingsForm.querySelector("#adsClientInput").value = siteSettings.adsClient;
-    siteSettingsForm.querySelector("#adsSlotInput").value = siteSettings.adsSlot;
-    siteSettingsForm.querySelector("#adsEnabledInput").checked = Boolean(siteSettings.adsEnabled);
-}
-
-function applySiteSettings() {
-    if (promoBanner) {
-        promoBanner.classList.toggle("hidden", !siteSettings.promoEnabled);
-    }
-    if (promoHeading) promoHeading.textContent = siteSettings.promoHeading;
-    if (promoText) promoText.textContent = siteSettings.promoText;
-    if (promoCta) {
-        promoCta.textContent = siteSettings.promoCtaText;
-        promoCta.setAttribute("href", siteSettings.promoCtaUrl);
-    }
-
-    if (adSlotSection) {
-        adSlotSection.classList.toggle("hidden", !siteSettings.adsEnabled);
-    }
-    if (adsDisplay) {
-        adsDisplay.setAttribute("data-ad-client", siteSettings.adsClient);
-        adsDisplay.setAttribute("data-ad-slot", siteSettings.adsSlot);
-    }
-
-    if (siteSettings.adsEnabled && !adsInitialized && window.adsbygoogle) {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            adsInitialized = true;
-        } catch (_error) {
-            showToast("Ad slot is configured but could not initialize in this environment.", "info");
-        }
-    }
-}
-
-function generateDealCardHTML(deal) {
-    const ownerActions = ownerUnlocked
-        ? `
-            <div class="deal-admin-actions">
-                <button class="deal-btn deal-admin-btn" data-action="edit" data-id="${deal.id}">Edit</button>
-                <button class="deal-btn deal-admin-btn deal-delete-btn" data-action="delete" data-id="${deal.id}">Delete</button>
-            </div>
-        `
-        : "";
+function dealCardHTML(product) {
+    const savings = product.listPrice - product.dealPrice;
+    const hasAffiliate = Boolean(product.affiliateUrl);
+    const couponChip = product.coupon ? `<span class="chip">Coupon ${escapeHTML(product.coupon)}</span>` : "";
+    const featuredChip = product.featured ? `<span class="chip">Featured</span>` : "";
 
     return `
-        <div class="deal-card" data-category="${deal.category}">
+        <article class="deal-card">
             <div class="deal-image">
-                ${escapeHtml(deal.icon)}
-                <span class="deal-badge ${deal.badge}">${escapeHtml(deal.discount)}</span>
+                ${product.imageUrl
+                    ? `<img src="${product.imageUrl}" alt="${escapeHTML(product.title)}" loading="lazy">`
+                    : `<span class="deal-placeholder">${escapeHTML(dealInitials(product))}</span>`}
             </div>
             <div class="deal-content">
-                <span class="deal-brand">${escapeHtml(deal.brand)}</span>
-                <h3>${escapeHtml(deal.title)}</h3>
-                <p>${escapeHtml(deal.description)}</p>
-                <div class="deal-price">
-                    <span class="price-current">$${deal.currentPrice.toFixed(2)}</span>
-                    <span class="price-original">$${deal.originalPrice.toFixed(2)}</span>
+                <div class="deal-head">
+                    <span class="deal-brand">${escapeHTML(product.brand)}</span>
+                    <span class="deal-tag ${product.badge}">${escapeHTML(badgeLabel(product.badge))}</span>
                 </div>
-                <div class="deal-footer">
-                    <button class="deal-btn" onclick="handleDealClick(${deal.id})">Get Deal</button>
-                    <span class="deal-expires">⏰ ${escapeHtml(deal.expires)}</span>
+                <h3 class="deal-title">${escapeHTML(product.title)}</h3>
+                <p class="deal-note">${escapeHTML(product.note)}</p>
+                <div class="price-row">
+                    <span class="deal-price">${money(product.dealPrice)}</span>
+                    <span class="deal-list-price">${money(product.listPrice)}</span>
                 </div>
-                ${ownerActions}
+                <div class="meta-row">
+                    <span>Save ${money(savings)} (${discountPercent(product)}%)</span>
+                    <span>Ends ${formatDate(product.expiresOn)}</span>
+                </div>
+                <div class="meta-row">
+                    <span>${escapeHTML(categoryLabel(product.category))}</span>
+                    <span>${couponChip}${featuredChip}</span>
+                </div>
+                <div class="deal-actions">
+                    <button class="btn btn-primary deal-link ${hasAffiliate ? "" : "disabled"}" type="button" data-action="open" data-id="${product.id}" ${hasAffiliate ? "" : "disabled"}>${hasAffiliate ? "Visit Offer" : "Link Pending"}</button>
+                </div>
             </div>
-        </div>
+        </article>
     `;
 }
 
-function renderDeals(filter = "all") {
-    if (!dealsGrid) return;
-    const filteredDeals = filter === "all" ? dealsData : dealsData.filter((deal) => deal.badge === filter);
-    dealsGrid.innerHTML = filteredDeals.map(generateDealCardHTML).join("");
+function getFilteredProducts() {
+    const search = elements.searchInput ? elements.searchInput.value.trim().toLowerCase() : "";
+    const category = elements.categoryFilter ? elements.categoryFilter.value : "all";
+    const badge = elements.badgeFilter ? elements.badgeFilter.value : "all";
+    const sort = elements.sortFilter ? elements.sortFilter.value : "newest";
+
+    let list = [...state.products];
+
+    if (search) {
+        list = list.filter((item) => {
+            const index = `${item.brand} ${item.title} ${item.note} ${item.coupon}`.toLowerCase();
+            return index.includes(search);
+        });
+    }
+
+    if (category !== "all") {
+        list = list.filter((item) => item.category === category);
+    }
+
+    if (badge !== "all") {
+        list = list.filter((item) => item.badge === badge);
+    }
+
+    switch (sort) {
+        case "max-discount":
+            list.sort((a, b) => discountPercent(b) - discountPercent(a));
+            break;
+        case "low-price":
+            list.sort((a, b) => a.dealPrice - b.dealPrice);
+            break;
+        case "ending-soon":
+            list.sort((a, b) => daysUntil(a.expiresOn) - daysUntil(b.expiresOn));
+            break;
+        case "newest":
+        default:
+            list.sort((a, b) => b.createdAt - a.createdAt);
+            break;
+    }
+
+    return list;
 }
 
-function handleDealClick(dealId) {
-    const deal = dealsData.find((item) => item.id === dealId);
-    if (!deal) return;
-    const redirectUrl = safeURL(deal.affiliateUrl);
-    if (!redirectUrl) {
-        showToast("This deal does not have a valid affiliate link yet.", "info");
+function renderDeals() {
+    if (!elements.dealsGrid) return;
+    const list = getFilteredProducts();
+    elements.dealsGrid.innerHTML = list.map(dealCardHTML).join("");
+    if (elements.dealsEmpty) {
+        elements.dealsEmpty.classList.toggle("hidden", list.length > 0);
+    }
+}
+
+function renderMetrics() {
+    if (!elements.metricProducts || !elements.metricSavings || !elements.metricCategories) return;
+    elements.metricProducts.textContent = String(state.products.length);
+
+    const totalSavings = state.products.reduce((sum, item) => sum + (item.listPrice - item.dealPrice), 0);
+    elements.metricSavings.textContent = money(totalSavings);
+
+    const uniqueCategories = new Set(state.products.map((item) => item.category));
+    elements.metricCategories.textContent = String(uniqueCategories.size);
+}
+
+function renderAdminTable() {
+    if (!elements.adminProductsTableBody) return;
+
+    if (state.products.length === 0) {
+        elements.adminProductsTableBody.innerHTML = "<tr><td colspan=\"5\">No products available.</td></tr>";
         return;
     }
-    showToast(`Redirecting you to ${deal.brand} for the "${deal.title}" deal!`, "success");
-    window.open(redirectUrl, "_blank", "noopener,noreferrer");
+
+    elements.adminProductsTableBody.innerHTML = state.products
+        .slice()
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((product) => {
+            return `
+                <tr>
+                    <td>${escapeHTML(product.brand)}<br><strong>${escapeHTML(product.title)}</strong></td>
+                    <td>${escapeHTML(categoryLabel(product.category))}</td>
+                    <td>${money(product.dealPrice)} / ${money(product.listPrice)}</td>
+                    <td>${product.affiliateUrl ? "Ready" : "Pending"}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="table-btn edit" data-action="edit-product" data-id="${product.id}" type="button">Edit</button>
+                            <button class="table-btn delete" data-action="delete-product" data-id="${product.id}" type="button">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        })
+        .join("");
 }
 
-function resetProductForm() {
-    if (!productForm) return;
-    productForm.reset();
-    productForm.querySelector("#productId").value = "";
-    if (productSubmitBtn) productSubmitBtn.textContent = "Save Product";
+function applySiteContent() {
+    document.title = `${state.settings.site.siteTitle} | Official Deals Hub`;
+    if (elements.navBrandTitle) elements.navBrandTitle.textContent = state.settings.site.siteTitle;
+    if (elements.footerBrandTitle) elements.footerBrandTitle.textContent = state.settings.site.siteTitle;
+    if (elements.heroTitle) elements.heroTitle.textContent = state.settings.site.heroTitle;
+    if (elements.heroSubtitle) elements.heroSubtitle.textContent = state.settings.site.heroSubtitle;
+    if (elements.footerYear) {
+        elements.footerYear.textContent = `Copyright ${new Date().getFullYear()} ${state.settings.site.siteTitle}. All rights reserved.`;
+    }
 }
 
-function fillProductForm(deal) {
-    if (!productForm || !deal) return;
-    productForm.querySelector("#productId").value = String(deal.id);
-    productForm.querySelector("#productBrand").value = deal.brand;
-    productForm.querySelector("#productTitle").value = deal.title;
-    productForm.querySelector("#productDescription").value = deal.description;
-    productForm.querySelector("#productCategory").value = deal.category;
-    productForm.querySelector("#productBadge").value = deal.badge;
-    productForm.querySelector("#productIcon").value = deal.icon;
-    productForm.querySelector("#productCurrentPrice").value = String(deal.currentPrice);
-    productForm.querySelector("#productOriginalPrice").value = String(deal.originalPrice);
-    productForm.querySelector("#productAffiliateUrl").value = deal.affiliateUrl;
-    productForm.querySelector("#productExpires").value = deal.expires;
-    if (productSubmitBtn) productSubmitBtn.textContent = "Update Product";
+function applyPromoContent() {
+    if (!elements.promoRibbon) return;
+    const promo = state.settings.promo;
+    elements.promoRibbon.classList.toggle("hidden", !promo.enabled);
+    if (elements.promoLabel) elements.promoLabel.textContent = promo.label;
+    if (elements.promoHeading) elements.promoHeading.textContent = promo.heading;
+    if (elements.promoText) elements.promoText.textContent = promo.text;
+    if (elements.promoCta) {
+        elements.promoCta.textContent = promo.ctaText;
+        elements.promoCta.setAttribute("href", promo.ctaUrl);
+    }
+}
+
+function applyAdsContent() {
+    if (!elements.adsSection || !elements.adsDisplay) return;
+    const ads = state.settings.ads;
+
+    elements.adsSection.classList.toggle("hidden", !ads.enabled);
+    if (elements.adsHeading) elements.adsHeading.textContent = ads.heading;
+    if (elements.adsDisclaimer) elements.adsDisclaimer.textContent = ads.disclaimer;
+
+    elements.adsDisplay.setAttribute("data-ad-client", ads.client);
+    elements.adsDisplay.setAttribute("data-ad-slot", ads.slot);
+
+    if (ads.enabled && window.adsbygoogle && !state.adsInitialized && !ads.client.includes("XXXXXXXXXXXXXXXX")) {
+        try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            state.adsInitialized = true;
+        } catch (_error) {
+            showToast("Ad slot configured but unavailable in this environment.", "info");
+        }
+    }
+}
+
+function applyAllUI() {
+    applySiteContent();
+    applyPromoContent();
+    applyAdsContent();
+    renderMetrics();
+    renderDeals();
+    renderAdminTable();
+}
+
+function setActiveTab(tab) {
+    elements.adminTabs.forEach((item) => {
+        item.classList.toggle("active", item.dataset.tab === tab);
+    });
+    elements.adminPanels.forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `panel-${tab}`);
+    });
+}
+
+function openDevModal() {
+    if (!elements.devModal) return;
+    elements.devModal.classList.remove("hidden");
+    elements.devModal.setAttribute("aria-hidden", "false");
+    state.devModalOpen = true;
+}
+
+function closeDevModal() {
+    if (!elements.devModal) return;
+    elements.devModal.classList.add("hidden");
+    elements.devModal.setAttribute("aria-hidden", "true");
+    state.devModalOpen = false;
 }
 
 function updateOwnerUI() {
-    const ownerHashExists = Boolean(localStorage.getItem(storageKeys.ownerHash));
-    if (ownerSetupForm) ownerSetupForm.classList.toggle("hidden", ownerHashExists);
-    if (ownerLoginForm) ownerLoginForm.classList.toggle("hidden", !ownerHashExists || ownerUnlocked);
-    if (ownerLogoutBtn) ownerLogoutBtn.classList.toggle("hidden", !ownerUnlocked);
-    if (productManager) productManager.classList.toggle("hidden", !ownerUnlocked);
-    if (siteSettingsPanel) siteSettingsPanel.classList.toggle("hidden", !ownerUnlocked);
+    if (!elements.ownerAccessStatus || !elements.ownerLogoutBtn || !elements.adminDashboard) return;
 
-    if (!ownerAccessStatus) return;
-    if (!ownerHashExists) {
-        ownerAccessStatus.textContent = "Create an owner password first. Management will be locked for others.";
-    } else if (ownerUnlocked) {
-        ownerAccessStatus.textContent = "Owner mode unlocked. You can now manage products, promotions, and ads.";
+    const loginForm = elements.ownerLoginForm;
+    if (!state.cloudReady) {
+        elements.ownerAccessStatus.textContent = "Cloud auth not configured. Add Firebase config to enable secure admin access.";
+        if (loginForm) {
+            loginForm.querySelectorAll("input,button").forEach((node) => {
+                node.disabled = true;
+            });
+        }
+        elements.ownerLogoutBtn.classList.add("hidden");
+        elements.adminDashboard.classList.add("hidden");
+        return;
+    }
+
+    if (loginForm) {
+        loginForm.querySelectorAll("input,button").forEach((node) => {
+            node.disabled = false;
+        });
+    }
+
+    if (state.ownerUnlocked) {
+        elements.ownerAccessStatus.textContent = `Authenticated as ${state.activeOwnerEmail || "owner"}. Admin controls enabled.`;
+        elements.ownerLogoutBtn.classList.remove("hidden");
+        elements.adminDashboard.classList.remove("hidden");
     } else {
-        ownerAccessStatus.textContent = "Management is locked. Enter owner password to continue.";
+        elements.ownerAccessStatus.textContent = "Sign in with your authorized owner account.";
+        elements.ownerLogoutBtn.classList.add("hidden");
+        elements.adminDashboard.classList.add("hidden");
     }
 }
 
-if (mobileMenuBtn && navLinks) {
-    mobileMenuBtn.addEventListener("click", () => {
-        navLinks.classList.toggle("active");
-        mobileMenuBtn.classList.toggle("active");
-    });
-    navLinks.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => {
-            navLinks.classList.remove("active");
-            mobileMenuBtn.classList.remove("active");
+function resetProductForm() {
+    if (!elements.productForm) return;
+    elements.productForm.reset();
+    elements.productForm.querySelector("#productId").value = "";
+    if (elements.productSubmitBtn) elements.productSubmitBtn.textContent = "Save Product";
+}
+
+function fillProductForm(product) {
+    if (!elements.productForm || !product) return;
+
+    elements.productForm.querySelector("#productId").value = product.id;
+    elements.productForm.querySelector("#productBrand").value = product.brand;
+    elements.productForm.querySelector("#productTitle").value = product.title;
+    elements.productForm.querySelector("#productCategory").value = product.category;
+    elements.productForm.querySelector("#productBadge").value = product.badge;
+    elements.productForm.querySelector("#productListPrice").value = String(product.listPrice);
+    elements.productForm.querySelector("#productDealPrice").value = String(product.dealPrice);
+    elements.productForm.querySelector("#productCoupon").value = product.coupon;
+    elements.productForm.querySelector("#productExpires").value = product.expiresOn;
+    elements.productForm.querySelector("#productAffiliateUrl").value = product.affiliateUrl;
+    elements.productForm.querySelector("#productImageUrl").value = product.imageUrl;
+    elements.productForm.querySelector("#productNote").value = product.note;
+    elements.productForm.querySelector("#productFeatured").checked = product.featured;
+    if (elements.productSubmitBtn) elements.productSubmitBtn.textContent = "Update Product";
+}
+
+function loadAdminFormsFromState() {
+    if (elements.promotionForm) {
+        elements.promotionForm.querySelector("#promoLabelInput").value = state.settings.promo.label;
+        elements.promotionForm.querySelector("#promoHeadingInput").value = state.settings.promo.heading;
+        elements.promotionForm.querySelector("#promoTextInput").value = state.settings.promo.text;
+        elements.promotionForm.querySelector("#promoCtaTextInput").value = state.settings.promo.ctaText;
+        elements.promotionForm.querySelector("#promoCtaUrlInput").value = state.settings.promo.ctaUrl;
+        elements.promotionForm.querySelector("#promoEnabledInput").checked = state.settings.promo.enabled;
+    }
+
+    if (elements.siteSettingsForm) {
+        elements.siteSettingsForm.querySelector("#siteTitleInput").value = state.settings.site.siteTitle;
+        elements.siteSettingsForm.querySelector("#heroTitleInput").value = state.settings.site.heroTitle;
+        elements.siteSettingsForm.querySelector("#heroSubtitleInput").value = state.settings.site.heroSubtitle;
+        elements.siteSettingsForm.querySelector("#privateEmailInput").value = state.settings.site.privateEmail;
+        elements.siteSettingsForm.querySelector("#whatsAppInput").value = state.settings.site.whatsAppLink;
+    }
+
+    if (elements.adsSettingsForm) {
+        elements.adsSettingsForm.querySelector("#adsHeadingInput").value = state.settings.ads.heading;
+        elements.adsSettingsForm.querySelector("#adsClientInput").value = state.settings.ads.client;
+        elements.adsSettingsForm.querySelector("#adsSlotInput").value = state.settings.ads.slot;
+        elements.adsSettingsForm.querySelector("#adsDisclaimerInput").value = state.settings.ads.disclaimer;
+        elements.adsSettingsForm.querySelector("#adsEnabledInput").checked = state.settings.ads.enabled;
+    }
+}
+
+function getLocalFallback(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function saveLocalFallback() {
+    try {
+        localStorage.setItem(localFallbackKeys.products, JSON.stringify(state.products));
+        localStorage.setItem(localFallbackKeys.settings, JSON.stringify(state.settings));
+    } catch (_error) {
+        return;
+    }
+}
+
+function loadLocalFallback() {
+    const products = getLocalFallback(localFallbackKeys.products);
+    if (Array.isArray(products)) {
+        const normalized = products.map(normalizeProduct).filter(Boolean);
+        if (normalized.length > 0) {
+            state.products = normalized;
+        }
+    }
+
+    const settings = getLocalFallback(localFallbackKeys.settings);
+    if (settings) {
+        state.settings = normalizeSettings(settings);
+    }
+}
+
+function userIsAuthorizedOwner(user) {
+    if (!user) return false;
+
+    const uidCheck = cloud.ownerUid && user.uid === cloud.ownerUid;
+    const emailCheck = cloud.ownerEmail && user.email && user.email.toLowerCase() === cloud.ownerEmail.toLowerCase();
+    const verifiedCheck = cloud.requireEmailVerified ? Boolean(user.emailVerified) : true;
+
+    if (!verifiedCheck) return false;
+    if (cloud.ownerUid) return uidCheck;
+    return emailCheck;
+}
+
+async function initializeCloudSecurity() {
+    const runtimeConfig = window.KASIREDDI_FIREBASE_CONFIG || {};
+    const firebaseConfig = runtimeConfig.firebaseConfig;
+
+    cloud.ownerUid = String(runtimeConfig.ownerUid || "").trim();
+    cloud.ownerEmail = String(runtimeConfig.ownerEmail || decodePrivateEmail()).trim();
+    cloud.requireEmailVerified = runtimeConfig.requireEmailVerified !== false;
+
+    if (!firebaseConfig || typeof firebaseConfig !== "object" || !firebaseConfig.apiKey || !firebaseConfig.projectId) {
+        state.cloudReady = false;
+        return false;
+    }
+
+    try {
+        const [
+            firebaseApp,
+            firebaseAuth,
+            firebaseFirestore
+        ] = await Promise.all([
+            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js"),
+            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js"),
+            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js")
+        ]);
+
+        cloud.initializeApp = firebaseApp.initializeApp;
+        cloud.getAuth = firebaseAuth.getAuth;
+        cloud.onAuthStateChanged = firebaseAuth.onAuthStateChanged;
+        cloud.signInWithEmailAndPassword = firebaseAuth.signInWithEmailAndPassword;
+        cloud.signOut = firebaseAuth.signOut;
+        cloud.setPersistence = firebaseAuth.setPersistence;
+        cloud.browserLocalPersistence = firebaseAuth.browserLocalPersistence;
+
+        cloud.getFirestore = firebaseFirestore.getFirestore;
+        cloud.doc = firebaseFirestore.doc;
+        cloud.setDoc = firebaseFirestore.setDoc;
+        cloud.updateDoc = firebaseFirestore.updateDoc;
+        cloud.deleteDoc = firebaseFirestore.deleteDoc;
+        cloud.getDocs = firebaseFirestore.getDocs;
+        cloud.writeBatch = firebaseFirestore.writeBatch;
+        cloud.collection = firebaseFirestore.collection;
+        cloud.query = firebaseFirestore.query;
+        cloud.orderBy = firebaseFirestore.orderBy;
+        cloud.onSnapshot = firebaseFirestore.onSnapshot;
+
+        cloud.app = cloud.initializeApp(firebaseConfig);
+        cloud.auth = cloud.getAuth(cloud.app);
+        cloud.db = cloud.getFirestore(cloud.app);
+
+        await cloud.setPersistence(cloud.auth, cloud.browserLocalPersistence);
+
+        state.cloudReady = true;
+
+        cloud.onAuthStateChanged(cloud.auth, async (user) => {
+            if (user && !userIsAuthorizedOwner(user)) {
+                state.ownerUnlocked = false;
+                state.activeOwnerEmail = user.email || "";
+                updateOwnerUI();
+                showToast("Signed in account is not authorized for owner access.", "error");
+                await cloud.signOut(cloud.auth);
+                return;
+            }
+
+            state.ownerUnlocked = Boolean(user);
+            state.activeOwnerEmail = user?.email || "";
+            updateOwnerUI();
         });
-    });
+
+        subscribeToCloudContent();
+        return true;
+    } catch (_error) {
+        state.cloudReady = false;
+        showToast("Firebase initialization failed. Running read-only fallback mode.", "error");
+        return false;
+    }
 }
 
-window.addEventListener("scroll", () => {
-    if (!navbar) return;
-    navbar.style.boxShadow =
-        window.scrollY > 100
-            ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-            : "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
-});
+function subscribeToCloudContent() {
+    if (!state.cloudReady || !cloud.db) return;
 
-filterBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-        filterBtns.forEach((item) => item.classList.remove("active"));
-        btn.classList.add("active");
-        renderDeals(btn.dataset.filter);
-    });
-});
+    const productsQuery = cloud.query(cloud.collection(cloud.db, "products"), cloud.orderBy("createdAt", "desc"));
+    cloud.unsubscribeProducts = cloud.onSnapshot(
+        productsQuery,
+        (snapshot) => {
+            const items = snapshot.docs
+                .map((docSnap) => normalizeProduct({ id: docSnap.id, ...docSnap.data() }))
+                .filter(Boolean);
+            if (items.length > 0) {
+                state.products = items;
+                saveLocalFallback();
+                applyAllUI();
+            } else {
+                state.products = clone(defaultProducts);
+                applyAllUI();
+            }
+        },
+        (_error) => {
+            showToast("Could not sync products from cloud.", "error");
+        }
+    );
 
-if (newsletterForm) {
-    newsletterForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        showToast("Thank you for subscribing! You'll receive our best deals in your inbox.", "success");
-        newsletterForm.reset();
-    });
+    cloud.unsubscribeSettings = cloud.onSnapshot(
+        cloud.doc(cloud.db, "site", "main"),
+        (docSnap) => {
+            if (docSnap.exists()) {
+                state.settings = normalizeSettings(docSnap.data());
+                saveLocalFallback();
+                applyAllUI();
+            }
+        },
+        (_error) => {
+            showToast("Could not sync settings from cloud.", "error");
+        }
+    );
 }
 
-if (contactForm) {
-    contactForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        showToast("Thank you for your message! We'll get back to you soon.", "success");
-        contactForm.reset();
-    });
+async function saveProductToCloud(product, isUpdate) {
+    const payload = {
+        ...product,
+        updatedAt: Date.now()
+    };
+    if (!isUpdate) {
+        payload.createdAt = Date.now();
+    }
+
+    if (isUpdate) {
+        await cloud.updateDoc(cloud.doc(cloud.db, "products", product.id), payload);
+    } else {
+        await cloud.setDoc(cloud.doc(cloud.db, "products", product.id), payload);
+    }
 }
 
-if (productForm) {
-    productForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!ownerUnlocked) {
-            showToast("Only owner can manage products.", "info");
-            return;
-        }
-
-        const productId = Number(productForm.querySelector("#productId").value || "0");
-        const brand = productForm.querySelector("#productBrand").value.trim();
-        const title = productForm.querySelector("#productTitle").value.trim();
-        const description = productForm.querySelector("#productDescription").value.trim();
-        const category = productForm.querySelector("#productCategory").value;
-        const badge = productForm.querySelector("#productBadge").value;
-        const icon = productForm.querySelector("#productIcon").value.trim();
-        const expires = productForm.querySelector("#productExpires").value.trim();
-        const affiliateUrl = productForm.querySelector("#productAffiliateUrl").value.trim();
-        const currentPrice = Number(productForm.querySelector("#productCurrentPrice").value);
-        const originalPrice = Number(productForm.querySelector("#productOriginalPrice").value);
-
-        const cleanAffiliateUrl = safeURL(affiliateUrl);
-        if (!cleanAffiliateUrl || cleanAffiliateUrl.startsWith("#")) {
-            showToast("Please enter a valid http(s) affiliate URL.", "info");
-            return;
-        }
-        if (!brand || !title || !description || !category || !badge || !icon || !expires) {
-            showToast("Please fill in all required product details.", "info");
-            return;
-        }
-        if (currentPrice <= 0) {
-            showToast("Current price must be greater than 0.", "info");
-            return;
-        }
-        if (originalPrice <= 0) {
-            showToast("Original price must be greater than 0.", "info");
-            return;
-        }
-        if (currentPrice >= originalPrice) {
-            showToast("Current price must be less than original price.", "info");
-            return;
-        }
-
-        const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-        const newDeal = {
-            id: productId || nextDealId,
-            brand,
-            title,
-            description,
-            currentPrice,
-            originalPrice,
-            discount: `${discountPercent}% OFF`,
-            badge,
-            category,
-            icon,
-            expires,
-            affiliateUrl: cleanAffiliateUrl
-        };
-
-        if (productId) {
-            dealsData = dealsData.map((item) => (item.id === productId ? newDeal : item));
-            showToast("Product updated successfully.", "success");
-        } else {
-            dealsData.unshift(newDeal);
-            nextDealId += 1;
-            showToast("Product added and published successfully.", "success");
-        }
-
-        saveManagedDeals();
-        renderDeals("all");
-        filterBtns.forEach((item) => item.classList.remove("active"));
-        if (filterBtns[0]) filterBtns[0].classList.add("active");
-        resetProductForm();
-    });
+async function deleteProductFromCloud(productId) {
+    await cloud.deleteDoc(cloud.doc(cloud.db, "products", productId));
 }
 
-if (productCancelEditBtn) {
-    productCancelEditBtn.addEventListener("click", () => resetProductForm());
+async function resetTemplatesInCloud() {
+    const docs = await cloud.getDocs(cloud.collection(cloud.db, "products"));
+    const batch = cloud.writeBatch(cloud.db);
+
+    docs.forEach((docSnap) => {
+        batch.delete(docSnap.ref);
+    });
+
+    const now = Date.now();
+    defaultProducts.forEach((product, index) => {
+        const prepared = normalizeProduct({
+            ...product,
+            createdAt: now + index,
+            updatedAt: now + index
+        });
+        if (!prepared) return;
+        batch.set(cloud.doc(cloud.db, "products", prepared.id), prepared);
+    });
+
+    await batch.commit();
 }
 
-if (resetDealsBtn) {
-    resetDealsBtn.addEventListener("click", () => {
-        if (!ownerUnlocked) {
-            showToast("Only owner can reset deals.", "info");
-            return;
-        }
-        dealsData = JSON.parse(JSON.stringify(defaultDealsData));
-        nextDealId = dealsData.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-        saveManagedDeals();
-        renderDeals("all");
-        resetProductForm();
-        showToast("Deals reset to defaults.", "success");
-    });
+async function saveSettingsToCloud() {
+    await cloud.setDoc(cloud.doc(cloud.db, "site", "main"), state.settings, { merge: true });
 }
 
-if (dealsGrid) {
-    dealsGrid.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-action][data-id]");
-        if (!target || !ownerUnlocked) return;
-        const action = target.getAttribute("data-action");
-        const dealId = Number(target.getAttribute("data-id"));
-        const deal = dealsData.find((item) => item.id === dealId);
-        if (!deal) return;
+async function replaceCloudDataFromBackup(backup) {
+    const docs = await cloud.getDocs(cloud.collection(cloud.db, "products"));
+    const batch = cloud.writeBatch(cloud.db);
 
-        if (action === "edit") {
-            fillProductForm(deal);
-            document.getElementById("productManager")?.scrollIntoView({ behavior: "smooth" });
-        }
-        if (action === "delete") {
-            dealsData = dealsData.filter((item) => item.id !== dealId);
-            saveManagedDeals();
-            renderDeals("all");
-            showToast("Product deleted.", "success");
-        }
+    docs.forEach((docSnap) => batch.delete(docSnap.ref));
+
+    backup.products.forEach((item) => {
+        const prepared = normalizeProduct(item);
+        if (!prepared) return;
+        batch.set(cloud.doc(cloud.db, "products", prepared.id), prepared);
     });
+
+    batch.set(cloud.doc(cloud.db, "site", "main"), normalizeSettings(backup.settings || {}), { merge: true });
+    await batch.commit();
 }
 
-if (ownerSetupForm) {
-    ownerSetupForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const password = ownerSetupForm.querySelector("#ownerPasswordSetup").value;
-        const confirmPassword = ownerSetupForm.querySelector("#ownerPasswordSetupConfirm").value;
-        if (password.length < 6) {
-            showToast("Owner password must be at least 6 characters.", "info");
-            return;
-        }
-        if (password !== confirmPassword) {
-            showToast("Password confirmation does not match.", "info");
-            return;
-        }
-        const hash = await hashPassword(password);
-        if (!hash) {
-            showToast("Secure owner setup is not supported in this browser.", "info");
-            return;
-        }
-        localStorage.setItem(storageKeys.ownerHash, hash);
-        ownerSetupForm.reset();
-        showToast("Owner password created successfully.", "success");
-        updateOwnerUI();
-    });
-}
+function bindSecretTriggers() {
+    let tapCount = 0;
+    let tapResetTimer = null;
+    const secretPhrase = "kasireddi";
 
-if (ownerLoginForm) {
-    ownerLoginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const password = ownerLoginForm.querySelector("#ownerPasswordLogin").value;
-        const hash = await hashPassword(password);
-        if (!hash) {
-            showToast("Secure owner login is not supported in this browser.", "info");
-            return;
-        }
-        const savedHash = localStorage.getItem(storageKeys.ownerHash);
-        if (!savedHash || hash !== savedHash) {
-            showToast("Invalid owner password.", "info");
-            return;
-        }
-        ownerUnlocked = true;
-        sessionStorage.setItem(storageKeys.ownerSession, "1");
-        ownerLoginForm.reset();
-        updateOwnerUI();
-        renderDeals("all");
-        updateSettingsForm();
-        showToast("Owner management unlocked.", "success");
-    });
-}
+    if (elements.brandSecretTap) {
+        elements.brandSecretTap.addEventListener("click", (event) => {
+            event.preventDefault();
+            tapCount += 1;
 
-if (ownerLogoutBtn) {
-    ownerLogoutBtn.addEventListener("click", () => {
-        ownerUnlocked = false;
-        sessionStorage.removeItem(storageKeys.ownerSession);
-        updateOwnerUI();
-        resetProductForm();
-        renderDeals("all");
-        showToast("Management locked.", "info");
-    });
-}
+            if (tapResetTimer) clearTimeout(tapResetTimer);
+            tapResetTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 1400);
 
-if (siteSettingsForm) {
-    siteSettingsForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!ownerUnlocked) {
-            showToast("Only owner can update site settings.", "info");
-            return;
-        }
-        const promoHeadingInput = siteSettingsForm.querySelector("#promoHeadingInput").value.trim();
-        const promoTextInput = siteSettingsForm.querySelector("#promoTextInput").value.trim();
-        const promoCtaTextInput = siteSettingsForm.querySelector("#promoCtaTextInput").value.trim();
-        const promoCtaUrlInput = siteSettingsForm.querySelector("#promoCtaUrlInput").value.trim();
-        const promoEnabledInput = siteSettingsForm.querySelector("#promoEnabledInput").checked;
-        const adsClientInput = siteSettingsForm.querySelector("#adsClientInput").value.trim();
-        const adsSlotInput = siteSettingsForm.querySelector("#adsSlotInput").value.trim();
-        const adsEnabledInput = siteSettingsForm.querySelector("#adsEnabledInput").checked;
-
-        const cleanPromoUrl = safeURL(promoCtaUrlInput);
-        if (!cleanPromoUrl) {
-            showToast("Enter a valid promo URL (https://... or #section).", "info");
-            return;
-        }
-        if (!promoHeadingInput || !promoTextInput || !promoCtaTextInput || !adsClientInput || !adsSlotInput) {
-            showToast("Please fill in all settings fields.", "info");
-            return;
-        }
-
-        siteSettings = {
-            promoHeading: promoHeadingInput,
-            promoText: promoTextInput,
-            promoCtaText: promoCtaTextInput,
-            promoCtaUrl: cleanPromoUrl,
-            promoEnabled: promoEnabledInput,
-            adsClient: adsClientInput,
-            adsSlot: adsSlotInput,
-            adsEnabled: adsEnabledInput
-        };
-        saveSiteSettings();
-        applySiteSettings();
-        showToast("Site settings saved successfully.", "success");
-    });
-}
-
-document.addEventListener("click", (event) => {
-    const anchor = event.target.closest('a[href^="#"]');
-    if (!anchor) return;
-    const href = anchor.getAttribute("href");
-    if (!href || href === "#") return;
-    const target = document.querySelector(href);
-    if (!target) return;
-    event.preventDefault();
-    target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-});
-
-document.querySelectorAll(".category-card").forEach((card) => {
-    card.addEventListener("click", () => {
-        const category = card.dataset.category;
-        document.getElementById("deals")?.scrollIntoView({ behavior: "smooth" });
-        const filteredDeals = dealsData.filter((deal) => deal.category === category);
-        dealsGrid.innerHTML = filteredDeals.map(generateDealCardHTML).join("");
-        filterBtns.forEach((btn) => btn.classList.remove("active"));
-        if (filterBtns[0]) filterBtns[0].classList.add("active");
-    });
-});
-
-const observer = new IntersectionObserver(
-    (entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("animate-fade-in");
-                observer.unobserve(entry.target);
+            if (tapCount >= 5) {
+                tapCount = 0;
+                openDevModal();
             }
         });
-    },
-    { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
-);
+    }
 
-document.querySelectorAll("section").forEach((section) => observer.observe(section));
+    window.addEventListener("keydown", (event) => {
+        if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "d") {
+            event.preventDefault();
+            openDevModal();
+            return;
+        }
+
+        if (state.devModalOpen) {
+            if (event.key === "Escape") closeDevModal();
+            return;
+        }
+
+        if (event.key.length === 1) {
+            state.typedSecretBuffer = `${state.typedSecretBuffer}${event.key.toLowerCase()}`.slice(-secretPhrase.length);
+            if (state.typedSecretBuffer === secretPhrase) {
+                state.typedSecretBuffer = "";
+                openDevModal();
+            }
+        }
+    });
+
+    if (location.hash.toLowerCase() === "#dev-kd") {
+        openDevModal();
+        history.replaceState(null, "", `${location.pathname}${location.search}`);
+    }
+}
+
+function bindEvents() {
+    if (elements.mobileMenuBtn && elements.navLinks) {
+        elements.mobileMenuBtn.addEventListener("click", () => {
+            elements.navLinks.classList.toggle("active");
+        });
+
+        elements.navLinks.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                elements.navLinks.classList.remove("active");
+            });
+        });
+    }
+
+    [elements.searchInput, elements.categoryFilter, elements.badgeFilter, elements.sortFilter]
+        .filter(Boolean)
+        .forEach((node) => {
+            node.addEventListener("input", renderDeals);
+            node.addEventListener("change", renderDeals);
+        });
+
+    document.querySelectorAll(".category-card").forEach((card) => {
+        card.addEventListener("click", () => {
+            if (!elements.categoryFilter) return;
+            elements.categoryFilter.value = card.dataset.category;
+            renderDeals();
+            document.querySelector("#best-deals")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    });
+
+    if (elements.dealsGrid) {
+        elements.dealsGrid.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-action='open'][data-id]");
+            if (!button) return;
+
+            const product = state.products.find((item) => item.id === button.dataset.id);
+            if (!product) return;
+
+            if (!product.affiliateUrl) {
+                showToast("Affiliate link will be added soon.", "info");
+                return;
+            }
+
+            window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+        });
+    }
+
+    if (elements.inquiryForm) {
+        elements.inquiryForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            elements.inquiryForm.reset();
+            showToast("Inquiry received. Connect backend mail service for delivery.", "info");
+        });
+    }
+
+    if (elements.devCloseBtn) {
+        elements.devCloseBtn.addEventListener("click", closeDevModal);
+    }
+
+    if (elements.devBackdrop) {
+        elements.devBackdrop.addEventListener("click", closeDevModal);
+    }
+
+    if (elements.ownerLoginForm) {
+        elements.ownerLoginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            if (!state.cloudReady || !cloud.auth) {
+                showToast("Cloud auth is not configured yet.", "error");
+                return;
+            }
+
+            const email = elements.ownerEmailLogin?.value.trim();
+            const password = elements.ownerPasswordLogin?.value;
+            if (!email || !password) {
+                showToast("Enter owner email and password.", "error");
+                return;
+            }
+
+            try {
+                await cloud.signInWithEmailAndPassword(cloud.auth, email, password);
+                if (elements.ownerPasswordLogin) elements.ownerPasswordLogin.value = "";
+                showToast("Sign in successful.", "success");
+            } catch (_error) {
+                showToast("Invalid owner credentials or unauthorized account.", "error");
+            }
+        });
+    }
+
+    if (elements.ownerLogoutBtn) {
+        elements.ownerLogoutBtn.addEventListener("click", async () => {
+            if (!state.cloudReady || !cloud.auth) return;
+            try {
+                await cloud.signOut(cloud.auth);
+                showToast("Signed out.", "info");
+            } catch (_error) {
+                showToast("Could not sign out.", "error");
+            }
+        });
+    }
+
+    if (elements.adminTabs.length > 0) {
+        elements.adminTabs.forEach((tabButton) => {
+            tabButton.addEventListener("click", () => {
+                if (!state.ownerUnlocked) return;
+                setActiveTab(tabButton.dataset.tab);
+            });
+        });
+    }
+
+    if (elements.productForm) {
+        elements.productForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can manage products.", "error");
+                return;
+            }
+
+            const payload = {
+                id: elements.productForm.querySelector("#productId").value || `p-${Date.now()}`,
+                brand: elements.productForm.querySelector("#productBrand").value,
+                title: elements.productForm.querySelector("#productTitle").value,
+                category: elements.productForm.querySelector("#productCategory").value,
+                badge: elements.productForm.querySelector("#productBadge").value,
+                listPrice: elements.productForm.querySelector("#productListPrice").value,
+                dealPrice: elements.productForm.querySelector("#productDealPrice").value,
+                coupon: elements.productForm.querySelector("#productCoupon").value,
+                expiresOn: elements.productForm.querySelector("#productExpires").value,
+                affiliateUrl: elements.productForm.querySelector("#productAffiliateUrl").value,
+                imageUrl: elements.productForm.querySelector("#productImageUrl").value,
+                note: elements.productForm.querySelector("#productNote").value,
+                featured: elements.productForm.querySelector("#productFeatured").checked,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+
+            const normalized = normalizeProduct(payload);
+            if (!normalized) {
+                showToast("Please provide valid product details.", "error");
+                return;
+            }
+
+            const existing = state.products.some((item) => item.id === normalized.id);
+
+            try {
+                await saveProductToCloud(normalized, existing);
+                resetProductForm();
+                showToast(existing ? "Product updated." : "Product created.", "success");
+            } catch (_error) {
+                showToast("Failed to save product to cloud.", "error");
+            }
+        });
+    }
+
+    if (elements.productCancelEditBtn) {
+        elements.productCancelEditBtn.addEventListener("click", resetProductForm);
+    }
+
+    if (elements.resetDealsBtn) {
+        elements.resetDealsBtn.addEventListener("click", async () => {
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can reset templates.", "error");
+                return;
+            }
+
+            if (!window.confirm("Reset to default templates?")) return;
+
+            try {
+                await resetTemplatesInCloud();
+                showToast("Templates reset successfully.", "success");
+            } catch (_error) {
+                showToast("Failed to reset templates.", "error");
+            }
+        });
+    }
+
+    if (elements.adminProductsTableBody) {
+        elements.adminProductsTableBody.addEventListener("click", async (event) => {
+            const target = event.target.closest("[data-action][data-id]");
+            if (!target || !state.ownerUnlocked || !state.cloudReady) return;
+
+            const productId = target.dataset.id;
+            const product = state.products.find((item) => item.id === productId);
+            if (!product) return;
+
+            if (target.dataset.action === "edit-product") {
+                fillProductForm(product);
+                setActiveTab("products");
+                elements.productForm?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+
+            if (target.dataset.action === "delete-product") {
+                if (!window.confirm("Delete this product?")) return;
+                try {
+                    await deleteProductFromCloud(productId);
+                    showToast("Product deleted.", "success");
+                } catch (_error) {
+                    showToast("Failed to delete product.", "error");
+                }
+            }
+        });
+    }
+
+    if (elements.promotionForm) {
+        elements.promotionForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update promotion.", "error");
+                return;
+            }
+
+            const promotion = {
+                enabled: elements.promotionForm.querySelector("#promoEnabledInput").checked,
+                label: elements.promotionForm.querySelector("#promoLabelInput").value.trim(),
+                heading: elements.promotionForm.querySelector("#promoHeadingInput").value.trim(),
+                text: elements.promotionForm.querySelector("#promoTextInput").value.trim(),
+                ctaText: elements.promotionForm.querySelector("#promoCtaTextInput").value.trim(),
+                ctaUrl: safeActionUrl(elements.promotionForm.querySelector("#promoCtaUrlInput").value.trim())
+            };
+
+            if (!promotion.label || !promotion.heading || !promotion.text || !promotion.ctaText || !promotion.ctaUrl) {
+                showToast("Fill all promotion fields with valid values.", "error");
+                return;
+            }
+
+            state.settings.promo = promotion;
+
+            try {
+                await saveSettingsToCloud();
+                showToast("Promotion updated.", "success");
+            } catch (_error) {
+                showToast("Failed to update promotion.", "error");
+            }
+        });
+    }
+
+    if (elements.siteSettingsForm) {
+        elements.siteSettingsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update site settings.", "error");
+                return;
+            }
+
+            const siteTitle = elements.siteSettingsForm.querySelector("#siteTitleInput").value.trim();
+            const heroTitle = elements.siteSettingsForm.querySelector("#heroTitleInput").value.trim();
+            const heroSubtitle = elements.siteSettingsForm.querySelector("#heroSubtitleInput").value.trim();
+            const privateEmail = elements.siteSettingsForm.querySelector("#privateEmailInput").value.trim();
+            const whatsappRaw = elements.siteSettingsForm.querySelector("#whatsAppInput").value.trim();
+            const whatsAppLink = whatsappRaw ? safeExternalUrl(whatsappRaw) : "";
+
+            if (!siteTitle || !heroTitle || !heroSubtitle || !privateEmail) {
+                showToast("Site title, hero content, and owner email are required.", "error");
+                return;
+            }
+
+            if (whatsappRaw && !whatsAppLink) {
+                showToast("Enter a valid WhatsApp URL.", "error");
+                return;
+            }
+
+            state.settings.site = {
+                siteTitle,
+                heroTitle,
+                heroSubtitle,
+                privateEmail,
+                whatsAppLink
+            };
+
+            try {
+                await saveSettingsToCloud();
+                showToast("Site settings updated.", "success");
+            } catch (_error) {
+                showToast("Failed to update site settings.", "error");
+            }
+        });
+    }
+
+    if (elements.adsSettingsForm) {
+        elements.adsSettingsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update ads settings.", "error");
+                return;
+            }
+
+            const ads = {
+                enabled: elements.adsSettingsForm.querySelector("#adsEnabledInput").checked,
+                heading: elements.adsSettingsForm.querySelector("#adsHeadingInput").value.trim(),
+                client: elements.adsSettingsForm.querySelector("#adsClientInput").value.trim(),
+                slot: elements.adsSettingsForm.querySelector("#adsSlotInput").value.trim(),
+                disclaimer: elements.adsSettingsForm.querySelector("#adsDisclaimerInput").value.trim()
+            };
+
+            if (!ads.heading || !ads.client || !ads.slot || !ads.disclaimer) {
+                showToast("All ads fields are required.", "error");
+                return;
+            }
+
+            state.settings.ads = ads;
+            state.adsInitialized = false;
+
+            try {
+                await saveSettingsToCloud();
+                showToast("Ads settings updated.", "success");
+            } catch (_error) {
+                showToast("Failed to update ads settings.", "error");
+            }
+        });
+    }
+
+    if (elements.exportDataBtn) {
+        elements.exportDataBtn.addEventListener("click", () => {
+            if (!state.ownerUnlocked) {
+                showToast("Only authenticated owner can export data.", "error");
+                return;
+            }
+
+            const payload = {
+                exportedAt: new Date().toISOString(),
+                products: state.products,
+                settings: state.settings
+            };
+
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "kasireddi-deals-backup.json";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            showToast("Backup exported.", "success");
+        });
+    }
+
+    if (elements.importDataBtn) {
+        elements.importDataBtn.addEventListener("click", async () => {
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can import backup.", "error");
+                return;
+            }
+
+            const file = elements.importDataInput?.files?.[0];
+            if (!file) {
+                showToast("Select a backup JSON file.", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const parsed = JSON.parse(String(reader.result));
+                    const products = Array.isArray(parsed.products)
+                        ? parsed.products.map(normalizeProduct).filter(Boolean)
+                        : [];
+                    if (products.length === 0) {
+                        showToast("Backup has no valid products.", "error");
+                        return;
+                    }
+
+                    const backupPayload = {
+                        products,
+                        settings: normalizeSettings(parsed.settings || {})
+                    };
+
+                    await replaceCloudDataFromBackup(backupPayload);
+                    showToast("Backup imported.", "success");
+                } catch (_error) {
+                    showToast("Invalid backup file.", "error");
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    document.addEventListener("click", (event) => {
+        const anchor = event.target.closest('a[href^="#"]');
+        if (!anchor) return;
+        const targetSelector = anchor.getAttribute("href");
+        if (!targetSelector || targetSelector === "#") return;
+        const target = document.querySelector(targetSelector);
+        if (!target) return;
+
+        event.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    window.addEventListener("scroll", () => {
+        if (!elements.navbar) return;
+        elements.navbar.style.boxShadow = window.scrollY > 16 ? "0 8px 28px rgba(15, 28, 51, 0.14)" : "none";
+    });
+
+    bindSecretTriggers();
+}
+
+function loadInitialState() {
+    loadLocalFallback();
+    applyAllUI();
+}
+
+async function init() {
+    bindEvents();
+    setActiveTab("products");
+    loadAdminFormsFromState();
+    loadInitialState();
+
+    const cloudOk = await initializeCloudSecurity();
+    updateOwnerUI();
+
+    if (!cloudOk) {
+        showToast("Running fallback mode. Configure Firebase for production security.", "info");
+    }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadManagedDeals();
-    loadSiteSettings();
-    ownerUnlocked = sessionStorage.getItem(storageKeys.ownerSession) === "1";
-    updateOwnerUI();
-    updateSettingsForm();
-    applySiteSettings();
-    renderDeals();
+    init().catch(() => {
+        showToast("App initialization failed.", "error");
+    });
 });
-
-window.handleDealClick = handleDealClick;
