@@ -105,6 +105,7 @@ const state = {
     adsInitialized: false,
     devModalOpen: false,
     typedSecretBuffer: "",
+    submitInProgress: false,
     cloudReady: false,
     activeOwnerEmail: ""
 };
@@ -1348,6 +1349,14 @@ function bindSecretTriggers() {
 }
 
 function bindEvents() {
+    // Hard stop default navigation on multi-item admin forms.
+    document.addEventListener("submit", (event) => {
+        if (event.target === elements.adsListingForm || event.target === elements.promoItemForm) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }, true);
+
     if (elements.mobileMenuBtn && elements.navLinks) {
         elements.mobileMenuBtn.addEventListener("click", () => {
             elements.navLinks.classList.toggle("active");
@@ -1602,7 +1611,10 @@ function bindEvents() {
                 return;
             }
 
-            state.settings.promo = promotion;
+            state.settings.promo = {
+                ...state.settings.promo,
+                ...promotion
+            };
 
             try {
                 await saveSettingsToCloud();
@@ -1676,7 +1688,10 @@ function bindEvents() {
                 return;
             }
 
-            state.settings.ads = ads;
+            state.settings.ads = {
+                ...state.settings.ads,
+                ...ads
+            };
             state.adsInitialized = false;
 
             try {
