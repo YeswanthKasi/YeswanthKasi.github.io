@@ -71,14 +71,16 @@ const defaultSettings = {
         heading: "Fresh India Deal Drops Are Live",
         text: "Discover trending products and save more with curated daily offers.",
         ctaText: "View Promotions",
-        ctaUrl: "#best-deals"
+        ctaUrl: "#best-deals",
+        items: []
     },
     ads: {
         enabled: true,
         heading: "Sponsored Offers",
         disclaimer: "Ads are managed securely by site owner.",
         client: "ca-pub-6185830543809180",
-        slot: "1234567890"
+        slot: "1234567890",
+        listings: []
     },
     sponsorship: {
         enabled: true,
@@ -164,6 +166,7 @@ const elements = {
     promoHeading: document.getElementById("promoHeading"),
     promoText: document.getElementById("promoText"),
     promoCta: document.getElementById("promoCta"),
+    promoItemsGrid: document.getElementById("promoItemsGrid"),
 
     searchInput: document.getElementById("searchInput"),
     categoryFilter: document.getElementById("categoryFilter"),
@@ -176,6 +179,7 @@ const elements = {
     adsDisplay: document.getElementById("adsDisplay"),
     adsHeading: document.getElementById("adsHeading"),
     adsDisclaimer: document.getElementById("adsDisclaimer"),
+    adsListingsGrid: document.getElementById("adsListingsGrid"),
 
     sponsorSection: document.getElementById("sponsorSection"),
     sponsorHeading: document.getElementById("sponsorHeading"),
@@ -208,8 +212,12 @@ const elements = {
     adminProductsTableBody: document.getElementById("adminProductsTableBody"),
 
     promotionForm: document.getElementById("promotionForm"),
+    promoItemForm: document.getElementById("promoItemForm"),
+    promoItemsTableBody: document.getElementById("promoItemsTableBody"),
     siteSettingsForm: document.getElementById("siteSettingsForm"),
     adsSettingsForm: document.getElementById("adsSettingsForm"),
+    adsListingForm: document.getElementById("adsListingForm"),
+    adsListingsTableBody: document.getElementById("adsListingsTableBody"),
     sponsorshipForm: document.getElementById("sponsorshipForm"),
 
     exportDataBtn: document.getElementById("exportDataBtn"),
@@ -227,6 +235,10 @@ function decodePrivateEmail() {
 
 function clone(value) {
     return JSON.parse(JSON.stringify(value));
+}
+
+function createId(prefix) {
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
 function isAdminPage() {
@@ -455,12 +467,50 @@ function normalizeSettings(raw) {
     merged.promo.text = String(merged.promo.text || defaultSettings.promo.text).trim();
     merged.promo.ctaText = String(merged.promo.ctaText || defaultSettings.promo.ctaText).trim();
     merged.promo.ctaUrl = safeActionUrl(String(merged.promo.ctaUrl || defaultSettings.promo.ctaUrl).trim()) || "#best-deals";
+    merged.promo.items = Array.isArray(merged.promo.items)
+        ? merged.promo.items
+            .map((item) => {
+                if (!item || typeof item !== "object") return null;
+                const title = String(item.title || "").trim();
+                const text = String(item.text || "").trim();
+                const badge = String(item.badge || "Promo").trim();
+                const url = safeActionUrl(String(item.url || "").trim());
+                if (!title || !text || !url) return null;
+                return {
+                    id: String(item.id || createId("promo")),
+                    badge: badge || "Promo",
+                    title,
+                    text,
+                    url
+                };
+            })
+            .filter(Boolean)
+        : [];
 
     merged.ads.enabled = Boolean(merged.ads.enabled);
     merged.ads.heading = String(merged.ads.heading || defaultSettings.ads.heading).trim();
     merged.ads.disclaimer = String(merged.ads.disclaimer || defaultSettings.ads.disclaimer).trim();
     merged.ads.client = String(merged.ads.client || defaultSettings.ads.client).trim();
     merged.ads.slot = String(merged.ads.slot || defaultSettings.ads.slot).trim();
+    merged.ads.listings = Array.isArray(merged.ads.listings)
+        ? merged.ads.listings
+            .map((item) => {
+                if (!item || typeof item !== "object") return null;
+                const title = String(item.title || "").trim();
+                const text = String(item.text || "").trim();
+                const label = String(item.label || "Sponsored").trim();
+                const url = safeActionUrl(String(item.url || "").trim());
+                if (!title || !text || !url) return null;
+                return {
+                    id: String(item.id || createId("ad")),
+                    label: label || "Sponsored",
+                    title,
+                    text,
+                    url
+                };
+            })
+            .filter(Boolean)
+        : [];
 
     merged.sponsorship.enabled = Boolean(merged.sponsorship.enabled);
     merged.sponsorship.heading = String(merged.sponsorship.heading || defaultSettings.sponsorship.heading).trim();
@@ -638,6 +688,22 @@ function applyPromoContent() {
     }
 }
 
+function renderPromoItems() {
+    if (!elements.promoItemsGrid) return;
+    const items = state.settings.promo.items || [];
+    elements.promoItemsGrid.classList.toggle("hidden", items.length === 0);
+    elements.promoItemsGrid.innerHTML = items
+        .map((item) => `
+            <article class="micro-card">
+                <span class="micro-badge">${escapeHTML(item.badge)}</span>
+                <h3>${escapeHTML(item.title)}</h3>
+                <p>${escapeHTML(item.text)}</p>
+                <a href="${escapeHTML(item.url)}" class="micro-link" rel="noopener">Open Offer</a>
+            </article>
+        `)
+        .join("");
+}
+
 function applyAdsContent() {
     if (!elements.adsSection || !elements.adsDisplay) return;
     const ads = state.settings.ads;
@@ -659,6 +725,22 @@ function applyAdsContent() {
     }
 }
 
+function renderAdsListings() {
+    if (!elements.adsListingsGrid) return;
+    const listings = state.settings.ads.listings || [];
+    elements.adsListingsGrid.classList.toggle("hidden", listings.length === 0);
+    elements.adsListingsGrid.innerHTML = listings
+        .map((item) => `
+            <article class="micro-card ads-micro-card">
+                <span class="micro-badge">${escapeHTML(item.label)}</span>
+                <h3>${escapeHTML(item.title)}</h3>
+                <p>${escapeHTML(item.text)}</p>
+                <a href="${escapeHTML(item.url)}" class="micro-link" rel="noopener">Visit Sponsor</a>
+            </article>
+        `)
+        .join("");
+}
+
 function applySponsorshipContent() {
     if (!elements.sponsorSection) return;
     const sponsor = state.settings.sponsorship;
@@ -677,11 +759,59 @@ function applySponsorshipContent() {
 function applyAllUI() {
     applySiteContent();
     applyPromoContent();
+    renderPromoItems();
     applyAdsContent();
+    renderAdsListings();
     applySponsorshipContent();
     renderMetrics();
     renderDeals();
     renderAdminTable();
+    renderPromoItemsAdminTable();
+    renderAdsListingsAdminTable();
+}
+
+function renderPromoItemsAdminTable() {
+    if (!elements.promoItemsTableBody) return;
+    const items = state.settings.promo.items || [];
+    if (items.length === 0) {
+        elements.promoItemsTableBody.innerHTML = "<tr><td colspan=\"4\">No promotion items yet.</td></tr>";
+        return;
+    }
+    elements.promoItemsTableBody.innerHTML = items.map((item) => `
+        <tr>
+            <td>${escapeHTML(item.badge)}</td>
+            <td>${escapeHTML(item.title)}</td>
+            <td>${escapeHTML(item.url)}</td>
+            <td>
+                <div class="table-actions">
+                    <button class="table-btn edit" data-action="edit-promo-item" data-id="${item.id}" type="button">Edit</button>
+                    <button class="table-btn delete" data-action="delete-promo-item" data-id="${item.id}" type="button">Delete</button>
+                </div>
+            </td>
+        </tr>
+    `).join("");
+}
+
+function renderAdsListingsAdminTable() {
+    if (!elements.adsListingsTableBody) return;
+    const listings = state.settings.ads.listings || [];
+    if (listings.length === 0) {
+        elements.adsListingsTableBody.innerHTML = "<tr><td colspan=\"4\">No sponsored listings yet.</td></tr>";
+        return;
+    }
+    elements.adsListingsTableBody.innerHTML = listings.map((item) => `
+        <tr>
+            <td>${escapeHTML(item.label)}</td>
+            <td>${escapeHTML(item.title)}</td>
+            <td>${escapeHTML(item.url)}</td>
+            <td>
+                <div class="table-actions">
+                    <button class="table-btn edit" data-action="edit-ads-item" data-id="${item.id}" type="button">Edit</button>
+                    <button class="table-btn delete" data-action="delete-ads-item" data-id="${item.id}" type="button">Delete</button>
+                </div>
+            </td>
+        </tr>
+    `).join("");
 }
 
 function setActiveTab(tab) {
@@ -799,6 +929,136 @@ function loadAdminFormsFromState() {
         elements.sponsorshipForm.querySelector("#sponsorCtaTextInput").value = state.settings.sponsorship.ctaText;
         elements.sponsorshipForm.querySelector("#sponsorCtaUrlInput").value = state.settings.sponsorship.ctaUrl;
         elements.sponsorshipForm.querySelector("#sponsorEnabledInput").checked = state.settings.sponsorship.enabled;
+    }
+
+    if (elements.promoItemForm) {
+        elements.promoItemForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can manage promotion items.", "error");
+                return;
+            }
+            const idNode = elements.promoItemForm.querySelector("#promoItemId");
+            const payload = {
+                id: idNode.value || createId("promo"),
+                badge: elements.promoItemForm.querySelector("#promoItemBadgeInput").value.trim() || "Promo",
+                title: elements.promoItemForm.querySelector("#promoItemTitleInput").value.trim(),
+                text: elements.promoItemForm.querySelector("#promoItemTextInput").value.trim(),
+                url: safeActionUrl(elements.promoItemForm.querySelector("#promoItemUrlInput").value.trim())
+            };
+            if (!payload.title || !payload.text || !payload.url) {
+                showToast("Enter valid promotion item details.", "error");
+                return;
+            }
+            const items = [...(state.settings.promo.items || [])];
+            const idx = items.findIndex((item) => item.id === payload.id);
+            if (idx >= 0) items[idx] = payload;
+            else items.unshift(payload);
+            state.settings.promo.items = items;
+            try {
+                await saveSettingsToCloud();
+                elements.promoItemForm.reset();
+                idNode.value = "";
+                showToast("Promotion item saved.", "success");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to save promotion item."), "error");
+            }
+        });
+    }
+
+    if (elements.promoItemsTableBody) {
+        elements.promoItemsTableBody.addEventListener("click", async (event) => {
+            const target = event.target.closest("[data-action][data-id]");
+            if (!target || !state.ownerUnlocked || !state.cloudReady) return;
+            const id = target.dataset.id;
+            const items = [...(state.settings.promo.items || [])];
+            const item = items.find((entry) => entry.id === id);
+            if (!item) return;
+
+            if (target.dataset.action === "edit-promo-item") {
+                elements.promoItemForm.querySelector("#promoItemId").value = item.id;
+                elements.promoItemForm.querySelector("#promoItemBadgeInput").value = item.badge;
+                elements.promoItemForm.querySelector("#promoItemTitleInput").value = item.title;
+                elements.promoItemForm.querySelector("#promoItemTextInput").value = item.text;
+                elements.promoItemForm.querySelector("#promoItemUrlInput").value = item.url;
+                return;
+            }
+
+            if (target.dataset.action === "delete-promo-item") {
+                state.settings.promo.items = items.filter((entry) => entry.id !== id);
+                try {
+                    await saveSettingsToCloud();
+                    showToast("Promotion item deleted.", "success");
+                } catch (error) {
+                    showToast(readableCloudError(error, "Failed to delete promotion item."), "error");
+                }
+            }
+        });
+    }
+
+    if (elements.adsListingForm) {
+        elements.adsListingForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can manage sponsored listings.", "error");
+                return;
+            }
+            const idNode = elements.adsListingForm.querySelector("#adsItemId");
+            const payload = {
+                id: idNode.value || createId("ad"),
+                label: elements.adsListingForm.querySelector("#adsItemLabelInput").value.trim() || "Sponsored",
+                title: elements.adsListingForm.querySelector("#adsItemTitleInput").value.trim(),
+                text: elements.adsListingForm.querySelector("#adsItemTextInput").value.trim(),
+                url: safeActionUrl(elements.adsListingForm.querySelector("#adsItemUrlInput").value.trim())
+            };
+            if (!payload.title || !payload.text || !payload.url) {
+                showToast("Enter valid sponsored listing details.", "error");
+                return;
+            }
+            const listings = [...(state.settings.ads.listings || [])];
+            const idx = listings.findIndex((item) => item.id === payload.id);
+            if (idx >= 0) listings[idx] = payload;
+            else listings.unshift(payload);
+            state.settings.ads.listings = listings;
+            try {
+                await saveSettingsToCloud();
+                elements.adsListingForm.reset();
+                idNode.value = "";
+                showToast("Sponsored listing saved.", "success");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to save sponsored listing."), "error");
+            }
+        });
+    }
+
+    if (elements.adsListingsTableBody) {
+        elements.adsListingsTableBody.addEventListener("click", async (event) => {
+            const target = event.target.closest("[data-action][data-id]");
+            if (!target || !state.ownerUnlocked || !state.cloudReady) return;
+            const id = target.dataset.id;
+            const listings = [...(state.settings.ads.listings || [])];
+            const item = listings.find((entry) => entry.id === id);
+            if (!item) return;
+
+            if (target.dataset.action === "edit-ads-item") {
+                elements.adsListingForm.querySelector("#adsItemId").value = item.id;
+                elements.adsListingForm.querySelector("#adsItemLabelInput").value = item.label;
+                elements.adsListingForm.querySelector("#adsItemTitleInput").value = item.title;
+                elements.adsListingForm.querySelector("#adsItemTextInput").value = item.text;
+                elements.adsListingForm.querySelector("#adsItemUrlInput").value = item.url;
+                return;
+            }
+
+            if (target.dataset.action === "delete-ads-item") {
+                state.settings.ads.listings = listings.filter((entry) => entry.id !== id);
+                try {
+                    await saveSettingsToCloud();
+                    showToast("Sponsored listing deleted.", "success");
+                } catch (error) {
+                    showToast(readableCloudError(error, "Failed to delete sponsored listing."), "error");
+                }
+            }
+        });
     }
 }
 

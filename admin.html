@@ -172,6 +172,44 @@
                         <button class="btn btn-primary" type="submit">Save Promotion</button>
                     </div>
                 </form>
+
+                <h3>Promotion Items</h3>
+                <form class="admin-form" id="promoItemForm">
+                    <input type="hidden" id="promoItemId">
+                    <label>
+                        Badge
+                        <input type="text" id="promoItemBadgeInput" placeholder="Flash Deal">
+                    </label>
+                    <label>
+                        Title
+                        <input type="text" id="promoItemTitleInput" required>
+                    </label>
+                    <label class="full">
+                        Text
+                        <input type="text" id="promoItemTextInput" required>
+                    </label>
+                    <label class="full">
+                        URL
+                        <input type="text" id="promoItemUrlInput" placeholder="#best-deals or https://" required>
+                    </label>
+                    <div class="form-actions full">
+                        <button class="btn btn-primary" type="submit">Save Promotion Item</button>
+                    </div>
+                </form>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Badge</th>
+                                <th>Title</th>
+                                <th>URL</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promoItemsTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="admin-panel" id="panel-site">
@@ -230,6 +268,44 @@
                         <button class="btn btn-primary" type="submit">Save Ads</button>
                     </div>
                 </form>
+
+                <h3>Sponsored Listings</h3>
+                <form class="admin-form" id="adsListingForm">
+                    <input type="hidden" id="adsItemId">
+                    <label>
+                        Label
+                        <input type="text" id="adsItemLabelInput" placeholder="Sponsored">
+                    </label>
+                    <label>
+                        Title
+                        <input type="text" id="adsItemTitleInput" required>
+                    </label>
+                    <label class="full">
+                        Text
+                        <input type="text" id="adsItemTextInput" required>
+                    </label>
+                    <label class="full">
+                        URL
+                        <input type="text" id="adsItemUrlInput" placeholder="https://" required>
+                    </label>
+                    <div class="form-actions full">
+                        <button class="btn btn-primary" type="submit">Save Sponsored Listing</button>
+                    </div>
+                </form>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Title</th>
+                                <th>URL</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adsListingsTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="admin-panel" id="panel-sponsorship">

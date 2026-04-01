@@ -665,9 +665,60 @@ textarea:focus {
 
 .ad-slot {
     min-height: 120px;
+    max-height: 220px;
+    overflow: hidden;
     background: #fff;
     border-radius: var(--r-md);
     border: 1px dashed rgba(15, 28, 51, 0.26);
+}
+
+.micro-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.micro-card {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(15, 28, 51, 0.1);
+    border-radius: var(--r-md);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 8px;
+}
+
+.micro-card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--navy);
+}
+
+.micro-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.micro-badge {
+    width: fit-content;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #695400;
+    background: rgba(255, 172, 44, 0.2);
+    border-radius: 999px;
+    padding: 3px 9px;
+}
+
+.micro-link {
+    font-weight: 700;
+    color: var(--blue);
+    text-decoration: none;
+}
+
+.micro-link:hover {
+    text-decoration: underline;
 }
 
 .sponsor-section {
@@ -1066,7 +1117,8 @@ textarea:focus {
 @media (max-width: 640px) {
     .deals-grid,
     .category-grid,
-    .controls-shell {
+    .controls-shell,
+    .micro-grid {
         grid-template-columns: 1fr;
     }
 
