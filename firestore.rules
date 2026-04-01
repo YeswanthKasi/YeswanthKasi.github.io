@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isOwner() {
       return request.auth != null
-        && request.auth.token.email == "Kasireddiyeswanth29@gmail.com"
+        && request.auth.uid == "qmiVmnMbcqdOUDTxU8goApB5qlB2"
         && request.auth.token.email_verified == true;
     }
 

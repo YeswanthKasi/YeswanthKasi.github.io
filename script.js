@@ -113,6 +113,8 @@ const cloud = {
     onAuthStateChanged: null,
     signInWithEmailAndPassword: null,
     signInWithPopup: null,
+    signInWithRedirect: null,
+    getRedirectResult: null,
     GoogleAuthProvider: null,
     signOut: null,
     setPersistence: null,
@@ -207,6 +209,22 @@ function decodePrivateEmail() {
 
 function clone(value) {
     return JSON.parse(JSON.stringify(value));
+}
+
+function readableAuthError(error) {
+    const code = error?.code || "auth/unknown";
+    switch (code) {
+        case "auth/unauthorized-domain":
+            return "Unauthorized domain. Add your site domain in Firebase Authentication -> Settings -> Authorized domains.";
+        case "auth/popup-blocked":
+            return "Popup was blocked by browser. Retrying with redirect login.";
+        case "auth/popup-closed-by-user":
+            return "Popup was closed before sign-in completed.";
+        case "auth/account-exists-with-different-credential":
+            return "Account exists with a different sign-in method for this email.";
+        default:
+            return `Google sign in failed (${code}).`;
+    }
 }
 
 function showToast(message, type = "success") {
@@ -774,6 +792,8 @@ async function initializeCloudSecurity() {
         cloud.onAuthStateChanged = firebaseAuth.onAuthStateChanged;
         cloud.signInWithEmailAndPassword = firebaseAuth.signInWithEmailAndPassword;
         cloud.signInWithPopup = firebaseAuth.signInWithPopup;
+        cloud.signInWithRedirect = firebaseAuth.signInWithRedirect;
+        cloud.getRedirectResult = firebaseAuth.getRedirectResult;
         cloud.GoogleAuthProvider = firebaseAuth.GoogleAuthProvider;
         cloud.signOut = firebaseAuth.signOut;
         cloud.setPersistence = firebaseAuth.setPersistence;
@@ -798,6 +818,13 @@ async function initializeCloudSecurity() {
         await cloud.setPersistence(cloud.auth, cloud.browserLocalPersistence);
 
         state.cloudReady = true;
+
+        // Complete redirect-based sign-in flows when popup is blocked.
+        try {
+            await cloud.getRedirectResult(cloud.auth);
+        } catch (error) {
+            showToast(readableAuthError(error), "error");
+        }
 
         cloud.onAuthStateChanged(cloud.auth, async (user) => {
             if (user && !userIsAuthorizedOwner(user)) {
@@ -1063,7 +1090,7 @@ function bindEvents() {
 
     if (elements.ownerGoogleLoginBtn) {
         elements.ownerGoogleLoginBtn.addEventListener("click", async () => {
-            if (!state.cloudReady || !cloud.auth || !cloud.signInWithPopup || !cloud.GoogleAuthProvider) {
+            if (!state.cloudReady || !cloud.auth || !cloud.signInWithPopup || !cloud.signInWithRedirect || !cloud.GoogleAuthProvider) {
                 showToast("Cloud auth is not configured yet.", "error");
                 return;
             }
@@ -1073,8 +1100,15 @@ function bindEvents() {
                 provider.setCustomParameters({ prompt: "select_account" });
                 await cloud.signInWithPopup(cloud.auth, provider);
                 showToast("Google sign in successful.", "success");
-            } catch (_error) {
-                showToast("Google sign in failed or account is unauthorized.", "error");
+            } catch (error) {
+                if (error?.code === "auth/popup-blocked") {
+                    showToast(readableAuthError(error), "info");
+                    const provider = new cloud.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: "select_account" });
+                    await cloud.signInWithRedirect(cloud.auth, provider);
+                    return;
+                }
+                showToast(readableAuthError(error), "error");
             }
         });
     }
