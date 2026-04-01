@@ -222,6 +222,16 @@ function readableAuthError(error) {
     switch (code) {
         case "auth/unauthorized-domain":
             return "Unauthorized domain. Add your site domain in Firebase Authentication -> Settings -> Authorized domains.";
+        case "auth/invalid-credential":
+            return "Invalid email or password for this account.";
+        case "auth/user-not-found":
+            return "No user found for this email in Firebase Authentication.";
+        case "auth/wrong-password":
+            return "Incorrect password. Try again or reset password in Firebase console.";
+        case "auth/invalid-email":
+            return "Invalid email format.";
+        case "auth/too-many-requests":
+            return "Too many failed login attempts. Wait a few minutes and retry.";
         case "auth/popup-blocked":
             return "Popup was blocked by browser. Retrying with redirect login.";
         case "auth/popup-closed-by-user":
@@ -864,7 +874,9 @@ async function initializeCloudSecurity() {
                 state.ownerUnlocked = false;
                 state.activeOwnerEmail = user.email || "";
                 updateOwnerUI();
-                showToast("Signed in account is not authorized for owner access.", "error");
+                const expectedUid = cloud.ownerUid || "not-configured";
+                const currentUid = user.uid || "unknown";
+                showToast(`Owner UID mismatch. Expected ${expectedUid}, signed in ${currentUid}.`, "error");
                 await cloud.signOut(cloud.auth);
                 return;
             }
