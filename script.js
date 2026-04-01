@@ -233,6 +233,20 @@ function readableAuthError(error) {
     }
 }
 
+function readableCloudError(error, fallback) {
+    const code = error?.code || "unknown";
+    if (code === "permission-denied") {
+        return "Permission denied. Confirm owner UID in firebase-config.js and firestore.rules, then deploy rules.";
+    }
+    if (code === "unavailable") {
+        return "Cloud unavailable. Check internet connection and retry.";
+    }
+    if (code === "failed-precondition") {
+        return "Cloud precondition failed. Verify Firestore database is created in project kasireddi-deals.";
+    }
+    return `${fallback} (${code})`;
+}
+
 function showToast(message, type = "success") {
     const oldToast = document.querySelector(".toast");
     if (oldToast) oldToast.remove();
@@ -1177,8 +1191,8 @@ function bindEvents() {
                 await saveProductToCloud(normalized, existing);
                 resetProductForm();
                 showToast(existing ? "Product updated." : "Product created.", "success");
-            } catch (_error) {
-                showToast("Failed to save product to cloud.", "error");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to save product to cloud."), "error");
             }
         });
     }
@@ -1225,8 +1239,8 @@ function bindEvents() {
                 try {
                     await deleteProductFromCloud(productId);
                     showToast("Product deleted.", "success");
-                } catch (_error) {
-                    showToast("Failed to delete product.", "error");
+                } catch (error) {
+                    showToast(readableCloudError(error, "Failed to delete product."), "error");
                 }
             }
         });
@@ -1259,8 +1273,8 @@ function bindEvents() {
             try {
                 await saveSettingsToCloud();
                 showToast("Promotion updated.", "success");
-            } catch (_error) {
-                showToast("Failed to update promotion.", "error");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to update promotion."), "error");
             }
         });
     }
@@ -1301,8 +1315,8 @@ function bindEvents() {
             try {
                 await saveSettingsToCloud();
                 showToast("Site settings updated.", "success");
-            } catch (_error) {
-                showToast("Failed to update site settings.", "error");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to update site settings."), "error");
             }
         });
     }
@@ -1334,8 +1348,8 @@ function bindEvents() {
             try {
                 await saveSettingsToCloud();
                 showToast("Ads settings updated.", "success");
-            } catch (_error) {
-                showToast("Failed to update ads settings.", "error");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to update ads settings."), "error");
             }
         });
     }
@@ -1398,8 +1412,8 @@ function bindEvents() {
 
                     await replaceCloudDataFromBackup(backupPayload);
                     showToast("Backup imported.", "success");
-                } catch (_error) {
-                    showToast("Invalid backup file.", "error");
+                } catch (error) {
+                    showToast(readableCloudError(error, "Backup import failed."), "error");
                 }
             };
             reader.readAsText(file);
@@ -1439,6 +1453,10 @@ async function init() {
 
     const cloudOk = await initializeCloudSecurity();
     updateOwnerUI();
+
+    if (cloudOk && isAdminPage()) {
+        showToast("Cloud connected. Sign in with Google to manage listings.", "success");
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

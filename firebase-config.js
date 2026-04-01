@@ -9,5 +9,5 @@ window.KASIREDDI_FIREBASE_CONFIG = {
     },
     ownerUid: "qmiVmnMbcqdOUDTxU8goApB5qlB2",
     ownerEmail: "Kasireddiyeswanth29@gmail.com",
-    requireEmailVerified: true
+    requireEmailVerified: false
 };
