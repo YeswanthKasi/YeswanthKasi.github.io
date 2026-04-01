@@ -1,0 +1,60 @@
+body.admin-page {
+    background: linear-gradient(155deg, #f5f8ff 0%, #edf5ff 38%, #fff7ea 100%);
+    min-height: 100vh;
+}
+
+.admin-main {
+    padding: 2.25rem 0 4rem;
+}
+
+.admin-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-auth-section {
+    margin-bottom: 1.25rem;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(18, 45, 112, 0.15);
+    border-radius: 20px;
+    padding: 1.2rem 1.35rem;
+    box-shadow: 0 18px 40px rgba(19, 44, 109, 0.1);
+}
+
+.auth-card h1 {
+    margin: 0.1rem 0 0.6rem;
+    color: #112b62;
+    font-size: clamp(1.5rem, 3.2vw, 2rem);
+}
+
+.auth-hint {
+    margin: 0.8rem 0 0;
+    color: #2a3f74;
+    font-size: 0.95rem;
+}
+
+.admin-dashboard {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(18, 45, 112, 0.14);
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 18px 36px rgba(17, 45, 112, 0.08);
+}
+
+.admin-panel h3 {
+    margin-top: 0.3rem;
+}
+
+@media (max-width: 860px) {
+    .auth-card,
+    .admin-dashboard {
+        border-radius: 16px;
+    }
+
+    .admin-main {
+        padding-top: 1.2rem;
+    }
+}

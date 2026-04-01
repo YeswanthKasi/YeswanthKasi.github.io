@@ -619,10 +619,10 @@ function setActiveTab(tab) {
 }
 
 function openDevModal() {
-    if (!elements.devModal) return;
-    elements.devModal.classList.remove("hidden");
-    elements.devModal.setAttribute("aria-hidden", "false");
-    state.devModalOpen = true;
+    if (location.pathname.toLowerCase().endsWith("/admin.html") || location.pathname.toLowerCase().endsWith("admin.html")) {
+        return;
+    }
+    window.location.href = "admin.html";
 }
 
 function closeDevModal() {
@@ -1065,26 +1065,7 @@ function bindEvents() {
     if (elements.ownerLoginForm) {
         elements.ownerLoginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-
-            if (!state.cloudReady || !cloud.auth) {
-                showToast("Cloud auth is not configured yet.", "error");
-                return;
-            }
-
-            const email = elements.ownerEmailLogin?.value.trim();
-            const password = elements.ownerPasswordLogin?.value;
-            if (!email || !password) {
-                showToast("Enter owner email and password.", "error");
-                return;
-            }
-
-            try {
-                await cloud.signInWithEmailAndPassword(cloud.auth, email, password);
-                if (elements.ownerPasswordLogin) elements.ownerPasswordLogin.value = "";
-                showToast("Sign in successful.", "success");
-            } catch (_error) {
-                showToast("Invalid owner credentials or unauthorized account.", "error");
-            }
+            showToast("Email/password owner login has been disabled. Use Google owner sign-in.", "info");
         });
     }
 
