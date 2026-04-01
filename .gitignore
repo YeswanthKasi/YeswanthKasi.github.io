@@ -1,0 +1,7 @@
+# Firebase Admin SDK service account keys (never commit)
+*-firebase-adminsdk-*.json
+*adminsdk*.json
+
+# Local environment files
+.env
+.env.*

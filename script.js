@@ -112,6 +112,8 @@ const cloud = {
     getAuth: null,
     onAuthStateChanged: null,
     signInWithEmailAndPassword: null,
+    signInWithPopup: null,
+    GoogleAuthProvider: null,
     signOut: null,
     setPersistence: null,
     browserLocalPersistence: null,
@@ -172,6 +174,7 @@ const elements = {
     ownerLoginForm: document.getElementById("ownerLoginForm"),
     ownerEmailLogin: document.getElementById("ownerEmailLogin"),
     ownerPasswordLogin: document.getElementById("ownerPasswordLogin"),
+    ownerGoogleLoginBtn: document.getElementById("ownerGoogleLoginBtn"),
     ownerLogoutBtn: document.getElementById("ownerLogoutBtn"),
     ownerAccessStatus: document.getElementById("ownerAccessStatus"),
     adminDashboard: document.getElementById("adminDashboard"),
@@ -770,6 +773,8 @@ async function initializeCloudSecurity() {
         cloud.getAuth = firebaseAuth.getAuth;
         cloud.onAuthStateChanged = firebaseAuth.onAuthStateChanged;
         cloud.signInWithEmailAndPassword = firebaseAuth.signInWithEmailAndPassword;
+        cloud.signInWithPopup = firebaseAuth.signInWithPopup;
+        cloud.GoogleAuthProvider = firebaseAuth.GoogleAuthProvider;
         cloud.signOut = firebaseAuth.signOut;
         cloud.setPersistence = firebaseAuth.setPersistence;
         cloud.browserLocalPersistence = firebaseAuth.browserLocalPersistence;
@@ -1052,6 +1057,24 @@ function bindEvents() {
                 showToast("Sign in successful.", "success");
             } catch (_error) {
                 showToast("Invalid owner credentials or unauthorized account.", "error");
+            }
+        });
+    }
+
+    if (elements.ownerGoogleLoginBtn) {
+        elements.ownerGoogleLoginBtn.addEventListener("click", async () => {
+            if (!state.cloudReady || !cloud.auth || !cloud.signInWithPopup || !cloud.GoogleAuthProvider) {
+                showToast("Cloud auth is not configured yet.", "error");
+                return;
+            }
+
+            try {
+                const provider = new cloud.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: "select_account" });
+                await cloud.signInWithPopup(cloud.auth, provider);
+                showToast("Google sign in successful.", "success");
+            } catch (_error) {
+                showToast("Google sign in failed or account is unauthorized.", "error");
             }
         });
     }
