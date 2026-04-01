@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isOwner() {
       return request.auth != null
-        && request.auth.uid == "qmiVmnMbcqdOUDTxU8goApB5qlB2";
+        && request.auth.uid == "BbEO7ou2wJeilZEsKEsp6YuSyeh2";
     }
 
     match /products/{productId} {
