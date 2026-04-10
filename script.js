@@ -342,6 +342,16 @@ function safeActionUrl(raw) {
     return safeExternalUrl(value);
 }
 
+function buildRedirectUrl(rawUrl, type, label) {
+    const clean = safeExternalUrl(rawUrl);
+    if (!clean) return "";
+    const params = new URLSearchParams();
+    params.set("to", clean);
+    params.set("type", String(type || "outbound"));
+    params.set("label", String(label || "external-link"));
+    return `redirect.html?${params.toString()}`;
+}
+
 function escapeHTML(raw) {
     return String(raw)
         .replace(/&/g, "&amp;")
@@ -1505,6 +1515,16 @@ function bindEvents() {
         if (!link) return;
         const href = link.getAttribute("href") || "";
         if (!href || href.startsWith("#")) return;
+
+        const redirectUrl = buildRedirectUrl(
+            href,
+            link.dataset.trackType || "outbound",
+            link.dataset.trackLabel || link.textContent || "external-link"
+        );
+        if (redirectUrl) {
+            event.preventDefault();
+            window.open(redirectUrl, "_blank", "noopener,noreferrer");
+        }
 
         trackOutboundClick({
             type: link.dataset.trackType || "outbound",

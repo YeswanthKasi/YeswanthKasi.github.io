@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Redirecting...</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: Manrope, system-ui, sans-serif;
+            background: linear-gradient(135deg, #f3f8ff 0%, #eef4ff 45%, #fff8ed 100%);
+            color: #12213f;
+            padding: 20px;
+        }
+        .card {
+            width: min(560px, 100%);
+            background: #fff;
+            border: 1px solid rgba(18, 33, 63, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 14px 34px rgba(17, 33, 70, 0.14);
+            padding: 20px;
+        }
+        h1 {
+            margin: 0 0 10px;
+            font-size: 1.35rem;
+        }
+        p {
+            margin: 0 0 12px;
+            color: #33456f;
+            line-height: 1.45;
+        }
+        a {
+            color: #1f53c7;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <article class="card">
+        <h1>Redirecting to offer...</h1>
+        <p id="status">Preparing secure redirect.</p>
+        <p><a id="continueLink" href="#">Continue now</a></p>
+    </article>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        (async function initRedirect() {
+            const statusNode = document.getElementById("status");
+            const continueNode = document.getElementById("continueLink");
+            const params = new URLSearchParams(window.location.search);
+            const target = params.get("to") || "";
+            const type = params.get("type") || "outbound";
+            const label = params.get("label") || "external-link";
+
+            function safeExternalUrl(raw) {
+                if (typeof raw !== "string") return "";
+                const value = raw.trim();
+                if (!value) return "";
+                try {
+                    const parsed = new URL(value);
+                    if (parsed.protocol === "https:" || parsed.protocol === "http:") return parsed.toString();
+                } catch (_error) {
+                    return "";
+                }
+                return "";
+            }
+
+            const cleanTarget = safeExternalUrl(target);
+            if (!cleanTarget) {
+                statusNode.textContent = "Invalid destination URL.";
+                continueNode.textContent = "Back to homepage";
+                continueNode.href = "index.html";
+                return;
+            }
+
+            continueNode.href = cleanTarget;
+
+            try {
+                const runtimeConfig = window.KASIREDDI_FIREBASE_CONFIG || {};
+                const firebaseConfig = runtimeConfig.firebaseConfig;
+
+                if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.projectId) {
+                    const [{ initializeApp }, firestore] = await Promise.all([
+                        import("https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js"),
+                        import("https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js")
+                    ]);
+
+                    const app = initializeApp(firebaseConfig);
+                    const db = firestore.getFirestore(app);
+                    await firestore.addDoc(firestore.collection(db, "clicks"), {
+                        type: String(type),
+                        label: String(label),
+                        url: cleanTarget,
+                        createdAt: firestore.serverTimestamp(),
+                        source: "redirect-gateway"
+                    });
+                }
+            } catch (_error) {
+                // Tracking must not block redirect.
+            }
+
+            statusNode.textContent = "Redirecting now...";
+            setTimeout(() => {
+                window.location.replace(cleanTarget);
+            }, 300);
+        })();
+    </script>
+</body>
+</html>
