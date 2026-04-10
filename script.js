@@ -101,6 +101,7 @@ const localFallbackKeys = {
 const state = {
     products: clone(defaultProducts),
     settings: clone(defaultSettings),
+    clickEvents: [],
     ownerUnlocked: false,
     adsInitialized: false,
     devModalOpen: false,
@@ -119,6 +120,7 @@ const cloud = {
     requireEmailVerified: true,
     unsubscribeProducts: null,
     unsubscribeSettings: null,
+    unsubscribeClicks: null,
 
     initializeApp: null,
     getAuth: null,
@@ -139,10 +141,13 @@ const cloud = {
     updateDoc: null,
     deleteDoc: null,
     getDocs: null,
+    addDoc: null,
+    serverTimestamp: null,
     writeBatch: null,
     collection: null,
     query: null,
     orderBy: null,
+    limit: null,
     onSnapshot: null
 };
 
@@ -188,6 +193,9 @@ const elements = {
     sponsorCardTitle: document.getElementById("sponsorCardTitle"),
     sponsorCardBody: document.getElementById("sponsorCardBody"),
     sponsorCta: document.getElementById("sponsorCta"),
+
+    analyticsSummary: document.getElementById("analyticsSummary"),
+    analyticsTableBody: document.getElementById("analyticsTableBody"),
 
     inquiryForm: document.getElementById("inquiryForm"),
 
@@ -665,6 +673,69 @@ function renderAdminTable() {
         .join("");
 }
 
+function formatDateTimeIST(raw) {
+    const date = raw && typeof raw.toDate === "function" ? raw.toDate() : new Date(raw || Date.now());
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
+}
+
+function renderAnalytics() {
+    if (!elements.analyticsTableBody || !elements.analyticsSummary) return;
+    if (!state.ownerUnlocked) {
+        elements.analyticsSummary.textContent = "Sign in to view analytics.";
+        elements.analyticsTableBody.innerHTML = "<tr><td colspan=\"4\">Owner login required.</td></tr>";
+        return;
+    }
+
+    const events = Array.isArray(state.clickEvents) ? state.clickEvents : [];
+    if (events.length === 0) {
+        elements.analyticsSummary.textContent = "No click data yet.";
+        elements.analyticsTableBody.innerHTML = "<tr><td colspan=\"4\">No analytics data available.</td></tr>";
+        return;
+    }
+
+    const grouped = new Map();
+    events.forEach((event) => {
+        const type = String(event.type || "unknown");
+        const label = String(event.label || event.url || "Untitled");
+        const key = `${type}__${label}`;
+        const prev = grouped.get(key) || { type, label, count: 0, last: null };
+        prev.count += 1;
+        const createdAt = event.createdAt && typeof event.createdAt.toDate === "function"
+            ? event.createdAt.toDate().getTime()
+            : new Date(event.createdAt || 0).getTime();
+        if (!prev.last || createdAt > prev.last) prev.last = createdAt;
+        grouped.set(key, prev);
+    });
+
+    const rows = [...grouped.values()].sort((a, b) => b.count - a.count).slice(0, 40);
+    elements.analyticsSummary.textContent = `Total outbound clicks tracked: ${events.length}`;
+    elements.analyticsTableBody.innerHTML = rows.map((row) => `
+        <tr>
+            <td>${escapeHTML(row.type)}</td>
+            <td>${escapeHTML(row.label)}</td>
+            <td>${row.count}</td>
+            <td>${formatDateTimeIST(row.last)}</td>
+        </tr>
+    `).join("");
+}
+
+async function trackOutboundClick(payload) {
+    if (!state.cloudReady || !cloud.db || !cloud.addDoc || !cloud.serverTimestamp) return;
+    const cleanUrl = safeExternalUrl(payload?.url || "");
+    if (!cleanUrl) return;
+    try {
+        await cloud.addDoc(cloud.collection(cloud.db, "clicks"), {
+            type: String(payload?.type || "outbound"),
+            label: String(payload?.label || "external-link"),
+            url: cleanUrl,
+            createdAt: cloud.serverTimestamp()
+        });
+    } catch (_error) {
+        // Ignore click tracking failures to avoid impacting navigation.
+    }
+}
+
 function applySiteContent() {
     document.title = `${state.settings.site.siteTitle} | Official Deals Hub`;
     if (elements.navBrandTitle) elements.navBrandTitle.textContent = state.settings.site.siteTitle;
@@ -699,7 +770,7 @@ function renderPromoItems() {
                 <span class="micro-badge">${escapeHTML(item.badge)}</span>
                 <h3>${escapeHTML(item.title)}</h3>
                 <p>${escapeHTML(item.text)}</p>
-                <a href="${escapeHTML(item.url)}" class="micro-link" rel="noopener">Open Offer</a>
+                <a href="${escapeHTML(item.url)}" class="micro-link" data-track-type="promotion" data-track-label="${escapeHTML(item.title)}" rel="noopener">Open Offer</a>
             </article>
         `)
         .join("");
@@ -736,7 +807,7 @@ function renderAdsListings() {
                 <span class="micro-badge">${escapeHTML(item.label)}</span>
                 <h3>${escapeHTML(item.title)}</h3>
                 <p>${escapeHTML(item.text)}</p>
-                <a href="${escapeHTML(item.url)}" class="micro-link" rel="noopener">Visit Sponsor</a>
+                <a href="${escapeHTML(item.url)}" class="micro-link" data-track-type="sponsored" data-track-label="${escapeHTML(item.title)}" rel="noopener">Visit Sponsor</a>
             </article>
         `)
         .join("");
@@ -754,6 +825,8 @@ function applySponsorshipContent() {
     if (elements.sponsorCta) {
         elements.sponsorCta.textContent = sponsor.ctaText;
         elements.sponsorCta.setAttribute("href", sponsor.ctaUrl);
+        elements.sponsorCta.dataset.trackType = "sponsorship";
+        elements.sponsorCta.dataset.trackLabel = sponsor.cardTitle || "Sponsorship";
     }
 }
 
@@ -769,6 +842,7 @@ function applyAllUI() {
     renderAdminTable();
     renderPromoItemsAdminTable();
     renderAdsListingsAdminTable();
+    renderAnalytics();
 }
 
 function renderPromoItemsAdminTable() {
@@ -1151,10 +1225,13 @@ async function initializeCloudSecurity() {
         cloud.updateDoc = firebaseFirestore.updateDoc;
         cloud.deleteDoc = firebaseFirestore.deleteDoc;
         cloud.getDocs = firebaseFirestore.getDocs;
+        cloud.addDoc = firebaseFirestore.addDoc;
+        cloud.serverTimestamp = firebaseFirestore.serverTimestamp;
         cloud.writeBatch = firebaseFirestore.writeBatch;
         cloud.collection = firebaseFirestore.collection;
         cloud.query = firebaseFirestore.query;
         cloud.orderBy = firebaseFirestore.orderBy;
+        cloud.limit = firebaseFirestore.limit;
         cloud.onSnapshot = firebaseFirestore.onSnapshot;
 
         cloud.app = cloud.initializeApp(firebaseConfig);
@@ -1233,6 +1310,22 @@ function subscribeToCloudContent() {
         },
         (_error) => {
             showToast("Could not sync settings from cloud.", "error");
+        }
+    );
+
+    const clicksQuery = cloud.query(
+        cloud.collection(cloud.db, "clicks"),
+        cloud.orderBy("createdAt", "desc"),
+        cloud.limit(500)
+    );
+    cloud.unsubscribeClicks = cloud.onSnapshot(
+        clicksQuery,
+        (snapshot) => {
+            state.clickEvents = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+            renderAnalytics();
+        },
+        (_error) => {
+            // Analytics should never block core storefront/admin flows.
         }
     );
 }
@@ -1398,9 +1491,27 @@ function bindEvents() {
                 return;
             }
 
+            trackOutboundClick({
+                type: "product",
+                label: product.title,
+                url: product.affiliateUrl
+            });
             window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
         });
     }
+
+    document.addEventListener("click", (event) => {
+        const link = event.target.closest("a[data-track-type][href]");
+        if (!link) return;
+        const href = link.getAttribute("href") || "";
+        if (!href || href.startsWith("#")) return;
+
+        trackOutboundClick({
+            type: link.dataset.trackType || "outbound",
+            label: link.dataset.trackLabel || link.textContent || "external-link",
+            url: href
+        });
+    });
 
     if (elements.inquiryForm) {
         elements.inquiryForm.addEventListener("submit", (event) => {

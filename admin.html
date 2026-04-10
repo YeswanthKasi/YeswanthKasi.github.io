@@ -49,6 +49,7 @@
                 <button class="admin-tab" data-tab="site" type="button">Site</button>
                 <button class="admin-tab" data-tab="ads" type="button">Ads</button>
                 <button class="admin-tab" data-tab="sponsorship" type="button">Sponsorship</button>
+                <button class="admin-tab" data-tab="analytics" type="button">Analytics</button>
                 <button class="admin-tab" data-tab="backup" type="button">Backup</button>
             </div>
 
@@ -343,6 +344,26 @@
                         <button class="btn btn-primary" type="submit">Save Sponsorship</button>
                     </div>
                 </form>
+            </div>
+
+            <div class="admin-panel" id="panel-analytics">
+                <h3>Performance Analytics</h3>
+                <p id="analyticsSummary">No click data yet.</p>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Label</th>
+                                <th>Clicks</th>
+                                <th>Last Click (IST)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsTableBody">
+                            <tr><td colspan="4">No analytics data available.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="admin-panel" id="panel-backup">
