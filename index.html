@@ -52,7 +52,42 @@
                         <a class="btn btn-primary" href="#best-deals">Explore Deals</a>
                         <a class="btn btn-outline" href="#categories">Browse Categories</a>
                     </div>
+                    <div class="hero-metrics">
+                        <article>
+                            <h3 id="metricProducts">0</h3>
+                            <p>Live Deals</p>
+                        </article>
+                        <article>
+                            <h3 id="metricSavings">₹0</h3>
+                            <p>Total Savings</p>
+                        </article>
+                        <article>
+                            <h3 id="metricCategories">0</h3>
+                            <p>Active Categories</p>
+                        </article>
+                    </div>
                 </div>
+            </div>
+        </section>
+
+        <section class="insight-strip" id="insightStrip">
+            <div class="container insight-grid">
+                <article>
+                    <p class="label">Top Discount Right Now</p>
+                    <h3 id="insightTopDiscount">-</h3>
+                </article>
+                <article>
+                    <p class="label">Best Value Category</p>
+                    <h3 id="insightTopCategory">-</h3>
+                </article>
+                <article>
+                    <p class="label">Deals Ending in 48h</p>
+                    <h3 id="insightEndingSoon">-</h3>
+                </article>
+                <article>
+                    <p class="label">Tracked Outbound Clicks</p>
+                    <h3 id="insightClickVolume">-</h3>
+                </article>
             </div>
         </section>
 
@@ -121,6 +156,39 @@
             </div>
         </section>
 
+        <section class="price-radar" id="price-radar">
+            <div class="container price-radar-grid">
+                <article class="price-radar-copy">
+                    <p class="section-kicker">Price Tracker</p>
+                    <h2>Set Alert, Wait For Price Drop</h2>
+                    <p>Create alerts for any product and target price. This uses cloud-backed submissions so the owner can process and notify quickly.</p>
+                    <ul>
+                        <li>Pick a product from current listings.</li>
+                        <li>Set your expected buy price.</li>
+                        <li>Get notified once price intent is captured.</li>
+                    </ul>
+                </article>
+                <form class="contact-form" id="priceAlertForm">
+                    <h3>Create Price Alert</h3>
+                    <label>
+                        Product
+                        <select id="alertProductSelect" required>
+                            <option value="">Select a product</option>
+                        </select>
+                    </label>
+                    <label>
+                        Target Price (INR)
+                        <input type="number" id="alertTargetPrice" min="1" step="1" required>
+                    </label>
+                    <label>
+                        Email
+                        <input type="email" id="alertEmail" required>
+                    </label>
+                    <button class="btn btn-primary" type="submit">Track This Price</button>
+                </form>
+            </div>
+        </section>
+
         <section class="categories" id="categories">
             <div class="container">
                 <div class="section-header">
@@ -153,6 +221,17 @@
                         <p>Bags, accessories, and booking offers</p>
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <section class="stores-section" id="stores">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-kicker">Store Intelligence</p>
+                    <h2>Most Active Stores</h2>
+                    <p>Auto-generated from live listings so you can see where value is currently concentrated.</p>
+                </div>
+                <div class="micro-grid" id="storeInsightsGrid"></div>
             </div>
         </section>
 
@@ -233,6 +312,19 @@
             </div>
         </div>
     </footer>
+
+    <section class="compare-tray hidden" id="compareTray">
+        <div class="container compare-wrap">
+            <div>
+                <p class="section-kicker">Compare Queue</p>
+                <h3><span id="compareCount">0</span> items selected</h3>
+            </div>
+            <div class="compare-list" id="compareList"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" id="clearCompareBtn" type="button">Clear</button>
+            </div>
+        </div>
+    </section>
 
     <script src="firebase-config.js"></script>
     <script src="script.js"></script>

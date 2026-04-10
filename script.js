@@ -112,6 +112,7 @@ const state = {
     products: clone(defaultProducts),
     settings: clone(defaultSettings),
     clickEvents: [],
+    compareQueue: [],
     ownerUnlocked: false,
     adsInitialized: false,
     devModalOpen: false,
@@ -210,6 +211,19 @@ const elements = {
 
     analyticsSummary: document.getElementById("analyticsSummary"),
     analyticsTableBody: document.getElementById("analyticsTableBody"),
+    insightTopDiscount: document.getElementById("insightTopDiscount"),
+    insightTopCategory: document.getElementById("insightTopCategory"),
+    insightEndingSoon: document.getElementById("insightEndingSoon"),
+    insightClickVolume: document.getElementById("insightClickVolume"),
+    storeInsightsGrid: document.getElementById("storeInsightsGrid"),
+    priceAlertForm: document.getElementById("priceAlertForm"),
+    alertProductSelect: document.getElementById("alertProductSelect"),
+    alertTargetPrice: document.getElementById("alertTargetPrice"),
+    alertEmail: document.getElementById("alertEmail"),
+    compareTray: document.getElementById("compareTray"),
+    compareList: document.getElementById("compareList"),
+    compareCount: document.getElementById("compareCount"),
+    clearCompareBtn: document.getElementById("clearCompareBtn"),
 
     inquiryForm: document.getElementById("inquiryForm"),
 
@@ -244,6 +258,8 @@ const elements = {
     sponsorshipForm: document.getElementById("sponsorshipForm"),
     liveDataForm: document.getElementById("liveDataForm"),
     liveDataStatus: document.getElementById("liveDataStatus"),
+    useSheetsPresetBtn: document.getElementById("useSheetsPresetBtn"),
+    saveAndSyncBtn: document.getElementById("saveAndSyncBtn"),
     syncNowBtn: document.getElementById("syncNowBtn"),
 
     exportDataBtn: document.getElementById("exportDataBtn"),
@@ -357,6 +373,11 @@ function safeActionUrl(raw) {
         return document.querySelector(value) ? value : "";
     }
     return safeExternalUrl(value);
+}
+
+function looksLikeGoogleAppsScriptFeed(url) {
+    const value = String(url || "").trim().toLowerCase();
+    return value.includes("script.google.com/macros/s/") && value.includes("/exec");
 }
 
 function buildRedirectUrl(rawUrl, type, label) {
@@ -615,6 +636,8 @@ function dealCardHTML(product) {
                 </div>
                 <div class="deal-actions">
                     <button class="btn btn-primary deal-link ${hasAffiliate ? "" : "disabled"}" type="button" data-action="open" data-id="${product.id}" ${hasAffiliate ? "" : "disabled"}>${hasAffiliate ? "Visit Offer" : "Link Pending"}</button>
+                    <button class="btn btn-outline deal-link" type="button" data-action="compare" data-id="${product.id}">Compare</button>
+                    <button class="btn btn-outline deal-link" type="button" data-action="alert" data-id="${product.id}">Set Alert</button>
                 </div>
             </div>
         </article>
@@ -670,6 +693,114 @@ function renderDeals() {
     if (elements.dealsEmpty) {
         elements.dealsEmpty.classList.toggle("hidden", list.length > 0);
     }
+}
+
+function renderInsights() {
+    if (!elements.insightTopDiscount || !elements.insightTopCategory || !elements.insightEndingSoon || !elements.insightClickVolume) return;
+
+    if (!state.products.length) {
+        elements.insightTopDiscount.textContent = "No deals";
+        elements.insightTopCategory.textContent = "No category";
+        elements.insightEndingSoon.textContent = "0";
+        elements.insightClickVolume.textContent = String((state.clickEvents || []).length);
+        return;
+    }
+
+    const topDeal = state.products.slice().sort((a, b) => discountPercent(b) - discountPercent(a))[0];
+    const byCategory = new Map();
+    state.products.forEach((item) => {
+        const row = byCategory.get(item.category) || { discount: 0, count: 0 };
+        row.discount += discountPercent(item);
+        row.count += 1;
+        byCategory.set(item.category, row);
+    });
+    const bestCategory = [...byCategory.entries()]
+        .map(([key, value]) => ({ key, avg: value.discount / Math.max(value.count, 1) }))
+        .sort((a, b) => b.avg - a.avg)[0];
+
+    const endingSoon = state.products.filter((item) => daysUntil(item.expiresOn) <= 2).length;
+    elements.insightTopDiscount.textContent = `${discountPercent(topDeal)}% on ${topDeal.brand}`;
+    elements.insightTopCategory.textContent = bestCategory ? categoryLabel(bestCategory.key) : "-";
+    elements.insightEndingSoon.textContent = String(endingSoon);
+    elements.insightClickVolume.textContent = String((state.clickEvents || []).length);
+}
+
+function renderStoreInsights() {
+    if (!elements.storeInsightsGrid) return;
+    if (!state.products.length) {
+        elements.storeInsightsGrid.innerHTML = "<article class=\"micro-card\"><h3>No store insights</h3><p>Add products to activate this section.</p></article>";
+        return;
+    }
+
+    const byBrand = new Map();
+    state.products.forEach((item) => {
+        const row = byBrand.get(item.brand) || { count: 0, avgDiscount: 0 };
+        row.count += 1;
+        row.avgDiscount += discountPercent(item);
+        byBrand.set(item.brand, row);
+    });
+
+    const cards = [...byBrand.entries()]
+        .map(([brand, value]) => ({
+            brand,
+            count: value.count,
+            avgDiscount: Math.round(value.avgDiscount / Math.max(value.count, 1))
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 6)
+        .map((item) => `
+            <article class="micro-card store-card">
+                <span class="micro-badge">${escapeHTML(item.brand)}</span>
+                <h3>${item.count} live deals</h3>
+                <p>Average discount: ${item.avgDiscount}%</p>
+            </article>
+        `)
+        .join("");
+
+    elements.storeInsightsGrid.innerHTML = cards;
+}
+
+function populatePriceAlertProducts() {
+    if (!elements.alertProductSelect) return;
+    const selectedValue = elements.alertProductSelect.value;
+    const options = state.products
+        .slice()
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((item) => `<option value="${item.id}">${escapeHTML(item.brand)} - ${escapeHTML(item.title)} (${money(item.dealPrice)})</option>`)
+        .join("");
+    elements.alertProductSelect.innerHTML = `<option value="">Select a product</option>${options}`;
+    if (selectedValue && state.products.some((item) => item.id === selectedValue)) {
+        elements.alertProductSelect.value = selectedValue;
+    }
+}
+
+function renderCompareTray() {
+    if (!elements.compareTray || !elements.compareList || !elements.compareCount) return;
+
+    const selected = state.compareQueue
+        .map((id) => state.products.find((item) => item.id === id))
+        .filter(Boolean);
+
+    elements.compareCount.textContent = String(selected.length);
+    elements.compareTray.classList.toggle("hidden", selected.length === 0);
+    elements.compareList.innerHTML = selected
+        .map((item) => `
+            <article class="compare-item">
+                <h4>${escapeHTML(item.brand)} ${escapeHTML(item.title)}</h4>
+                <p>${money(item.dealPrice)} vs ${money(item.listPrice)} | ${discountPercent(item)}% off</p>
+            </article>
+        `)
+        .join("");
+}
+
+function addToCompareQueue(productId) {
+    if (!productId) return;
+    if (state.compareQueue.includes(productId)) {
+        showToast("Already in compare queue.", "info");
+        return;
+    }
+    state.compareQueue = [...state.compareQueue, productId].slice(-4);
+    renderCompareTray();
 }
 
 function renderMetrics() {
@@ -883,6 +1014,10 @@ function applyAllUI() {
     renderPromoItemsAdminTable();
     renderAdsListingsAdminTable();
     renderAnalytics();
+    renderInsights();
+    renderStoreInsights();
+    populatePriceAlertProducts();
+    renderCompareTray();
 }
 
 function renderPromoItemsAdminTable() {
@@ -1434,6 +1569,70 @@ async function saveSettingsToCloud() {
     await cloud.setDoc(cloud.doc(cloud.db, "site", "main"), state.settings, { merge: true });
 }
 
+function buildLiveDataConfigFromForm() {
+    if (!elements.liveDataForm) return null;
+
+    const rawFeedUrl = elements.liveDataForm.querySelector("#liveFeedUrlInput").value.trim();
+    const feedUrl = safeExternalUrl(rawFeedUrl);
+    let provider = elements.liveDataForm.querySelector("#liveProviderInput").value.trim();
+    const apiKey = elements.liveDataForm.querySelector("#liveApiKeyInput").value.trim();
+    const itemLimit = Math.min(Math.max(Number(elements.liveDataForm.querySelector("#liveItemLimitInput").value) || 100, 1), 500);
+    const enabled = elements.liveDataForm.querySelector("#liveEnabledInput").checked;
+
+    if (!provider && looksLikeGoogleAppsScriptFeed(feedUrl)) {
+        provider = "google-sheets";
+    }
+
+    if (!feedUrl || !provider) {
+        return null;
+    }
+
+    return {
+        enabled,
+        provider,
+        feedUrl,
+        apiKey,
+        itemLimit
+    };
+}
+
+async function runLiveSyncFromSettings() {
+    if (!state.ownerUnlocked || !state.cloudReady || !cloud.syncMerchantFeedCallable) {
+        showToast("Live sync callable is not ready.", "error");
+        return false;
+    }
+
+    const cfg = state.settings.liveData;
+    if (!cfg.feedUrl || !cfg.provider) {
+        showToast("Save live data config first.", "error");
+        return false;
+    }
+
+    try {
+        const result = await cloud.syncMerchantFeedCallable({
+            provider: cfg.provider,
+            feedUrl: cfg.feedUrl,
+            apiKey: cfg.apiKey || "",
+            itemLimit: cfg.itemLimit || 100
+        });
+
+        const count = Number(result?.data?.syncedCount) || 0;
+        state.settings.liveData.lastSyncAt = Date.now();
+        state.settings.liveData.lastSyncCount = count;
+        state.settings.liveData.lastSyncStatus = "success";
+        await saveSettingsToCloud();
+        loadAdminFormsFromState();
+        showToast(`Live sync completed. ${count} items updated.`, "success");
+        return true;
+    } catch (error) {
+        state.settings.liveData.lastSyncStatus = "failed";
+        await saveSettingsToCloud();
+        loadAdminFormsFromState();
+        showToast(readableCloudError(error, "Live sync failed."), "error");
+        return false;
+    }
+}
+
 async function replaceCloudDataFromBackup(backup) {
     const docs = await cloud.getDocs(cloud.collection(cloud.db, "products"));
     const batch = cloud.writeBatch(cloud.db);
@@ -1539,6 +1738,23 @@ function bindEvents() {
     if (elements.dealsGrid) {
         elements.dealsGrid.addEventListener("click", (event) => {
             const button = event.target.closest("[data-action='open'][data-id]");
+            const compareBtn = event.target.closest("[data-action='compare'][data-id]");
+            const alertBtn = event.target.closest("[data-action='alert'][data-id]");
+
+            if (compareBtn) {
+                addToCompareQueue(compareBtn.dataset.id);
+                showToast("Added to compare queue.", "success");
+                return;
+            }
+
+            if (alertBtn) {
+                const product = state.products.find((item) => item.id === alertBtn.dataset.id);
+                if (!product || !elements.alertProductSelect) return;
+                elements.alertProductSelect.value = product.id;
+                document.querySelector("#price-radar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                return;
+            }
+
             if (!button) return;
 
             const product = state.products.find((item) => item.id === button.dataset.id);
@@ -1555,6 +1771,50 @@ function bindEvents() {
                 url: product.affiliateUrl
             });
             window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+        });
+    }
+
+    if (elements.clearCompareBtn) {
+        elements.clearCompareBtn.addEventListener("click", () => {
+            state.compareQueue = [];
+            renderCompareTray();
+        });
+    }
+
+    if (elements.priceAlertForm) {
+        elements.priceAlertForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const productId = elements.alertProductSelect?.value || "";
+            const targetPrice = parsePrice(elements.alertTargetPrice?.value || "");
+            const email = String(elements.alertEmail?.value || "").trim().toLowerCase();
+            const product = state.products.find((item) => item.id === productId);
+
+            if (!product || !Number.isFinite(targetPrice) || targetPrice <= 0 || !email) {
+                showToast("Enter valid product, target price, and email.", "error");
+                return;
+            }
+
+            if (!state.cloudReady || !cloud.db || !cloud.addDoc) {
+                showToast("Cloud is not ready for alerts yet.", "error");
+                return;
+            }
+
+            try {
+                await cloud.addDoc(cloud.collection(cloud.db, "priceAlerts"), {
+                    productId: product.id,
+                    productTitle: product.title,
+                    brand: product.brand,
+                    currentPrice: product.dealPrice,
+                    targetPrice,
+                    email,
+                    status: "open",
+                    createdAt: cloud.serverTimestamp()
+                });
+                elements.priceAlertForm.reset();
+                showToast("Price alert created successfully.", "success");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to create price alert."), "error");
+            }
         });
     }
 
@@ -1924,24 +2184,15 @@ function bindEvents() {
                 return;
             }
 
-            const feedUrl = safeExternalUrl(elements.liveDataForm.querySelector("#liveFeedUrlInput").value.trim());
-            const provider = elements.liveDataForm.querySelector("#liveProviderInput").value.trim();
-            const apiKey = elements.liveDataForm.querySelector("#liveApiKeyInput").value.trim();
-            const itemLimit = Math.min(Math.max(Number(elements.liveDataForm.querySelector("#liveItemLimitInput").value) || 100, 1), 500);
-            const enabled = elements.liveDataForm.querySelector("#liveEnabledInput").checked;
-
-            if (!provider || !feedUrl) {
+            const config = buildLiveDataConfigFromForm();
+            if (!config) {
                 showToast("Provider and valid feed URL are required.", "error");
                 return;
             }
 
             state.settings.liveData = {
                 ...state.settings.liveData,
-                enabled,
-                provider,
-                feedUrl,
-                apiKey,
-                itemLimit
+                ...config
             };
 
             try {
@@ -1954,40 +2205,49 @@ function bindEvents() {
         });
     }
 
-    if (elements.syncNowBtn) {
-        elements.syncNowBtn.addEventListener("click", async () => {
-            if (!state.ownerUnlocked || !state.cloudReady || !cloud.syncMerchantFeedCallable) {
-                showToast("Live sync callable is not ready.", "error");
+    if (elements.useSheetsPresetBtn && elements.liveDataForm) {
+        elements.useSheetsPresetBtn.addEventListener("click", () => {
+            elements.liveDataForm.querySelector("#liveProviderInput").value = "google-sheets";
+            elements.liveDataForm.querySelector("#liveApiKeyInput").value = "";
+            elements.liveDataForm.querySelector("#liveItemLimitInput").value = "100";
+            elements.liveDataForm.querySelector("#liveEnabledInput").checked = true;
+            showToast("Google Sheets preset applied. Paste your Apps Script /exec URL and save.", "info");
+        });
+    }
+
+    if (elements.saveAndSyncBtn) {
+        elements.saveAndSyncBtn.addEventListener("click", async () => {
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update live data config.", "error");
                 return;
             }
 
-            const cfg = state.settings.liveData;
-            if (!cfg.feedUrl || !cfg.provider) {
-                showToast("Save live data config first.", "error");
+            const config = buildLiveDataConfigFromForm();
+            if (!config) {
+                showToast("Provider and valid feed URL are required.", "error");
                 return;
             }
+
+            state.settings.liveData = {
+                ...state.settings.liveData,
+                ...config
+            };
 
             try {
-                const result = await cloud.syncMerchantFeedCallable({
-                    provider: cfg.provider,
-                    feedUrl: cfg.feedUrl,
-                    apiKey: cfg.apiKey || "",
-                    itemLimit: cfg.itemLimit || 100
-                });
-
-                const count = Number(result?.data?.syncedCount) || 0;
-                state.settings.liveData.lastSyncAt = Date.now();
-                state.settings.liveData.lastSyncCount = count;
-                state.settings.liveData.lastSyncStatus = "success";
                 await saveSettingsToCloud();
                 loadAdminFormsFromState();
-                showToast(`Live sync completed. ${count} items updated.`, "success");
             } catch (error) {
-                state.settings.liveData.lastSyncStatus = "failed";
-                await saveSettingsToCloud();
-                loadAdminFormsFromState();
-                showToast(readableCloudError(error, "Live sync failed."), "error");
+                showToast(readableCloudError(error, "Failed to save live data config."), "error");
+                return;
             }
+
+            await runLiveSyncFromSettings();
+        });
+    }
+
+    if (elements.syncNowBtn) {
+        elements.syncNowBtn.addEventListener("click", async () => {
+            await runLiveSyncFromSettings();
         });
     }
 
