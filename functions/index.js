@@ -27,24 +27,42 @@ function mapBadge(raw) {
   return "new";
 }
 
+function getFirstValue(item, candidates) {
+  if (!item || typeof item !== "object") return "";
+  const keys = Object.keys(item);
+  for (const candidate of candidates) {
+    if (Object.prototype.hasOwnProperty.call(item, candidate) && item[candidate] != null && item[candidate] !== "") {
+      return item[candidate];
+    }
+    const normalizedCandidate = String(candidate).toLowerCase().replace(/[^a-z0-9]/g, "");
+    const matchKey = keys.find((key) =>
+      String(key).toLowerCase().replace(/[^a-z0-9]/g, "") === normalizedCandidate
+    );
+    if (matchKey && item[matchKey] != null && item[matchKey] !== "") {
+      return item[matchKey];
+    }
+  }
+  return "";
+}
+
 function normalizeFeedItem(item, provider) {
-  const title = String(item.title || item.name || item.productTitle || "").trim();
-  const brand = String(item.brand || item.store || provider || "Partner").trim();
-  const dealPrice = Number(item.dealPrice || item.price || item.salePrice || 0);
-  const listPriceInput = Number(item.listPrice || item.mrp || item.originalPrice || 0);
+  const title = String(getFirstValue(item, ["title", "name", "productTitle", "product_name", "Product Name"]) || "").trim();
+  const brand = String(getFirstValue(item, ["brand", "store", "merchant", "Brand"]) || provider || "Partner").trim();
+  const dealPrice = Number(getFirstValue(item, ["dealPrice", "price", "salePrice", "deal_price", "Deal Price", "Price"]) || 0);
+  const listPriceInput = Number(getFirstValue(item, ["listPrice", "mrp", "originalPrice", "list_price", "List Price", "MRP"]) || 0);
   const listPrice = listPriceInput > dealPrice ? listPriceInput : Math.round(dealPrice * 1.2);
-  const affiliateUrl = String(item.affiliateUrl || item.url || item.link || "").trim();
-  const imageUrl = String(item.imageUrl || item.image || item.thumbnail || "").trim();
-  const category = mapCategory(item.category || item.department || "electronics");
-  const badge = mapBadge(item.badge || item.tag || "new");
-  const note = String(item.note || item.description || "Latest live synced offer").trim();
+  const affiliateUrl = String(getFirstValue(item, ["affiliateUrl", "url", "link", "affiliate_url", "URL", "Affiliate URL"]) || "").trim();
+  const imageUrl = String(getFirstValue(item, ["imageUrl", "image", "thumbnail", "image_url", "Image URL"]) || "").trim();
+  const category = mapCategory(getFirstValue(item, ["category", "department", "Category"]) || "electronics");
+  const badge = mapBadge(getFirstValue(item, ["badge", "tag", "Badge"]) || "new");
+  const note = String(getFirstValue(item, ["note", "description", "Note", "Description"]) || "Latest live synced offer").trim();
 
   if (!title || !brand || !affiliateUrl) return null;
   if (!Number.isFinite(dealPrice) || dealPrice <= 0) return null;
 
   const now = Date.now();
   const expires = new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const sourceId = String(item.id || item.sku || `${provider}-${title}`)
+  const sourceId = String(getFirstValue(item, ["id", "sku", "productId", "Product ID"]) || `${provider}-${title}`)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
@@ -58,12 +76,12 @@ function normalizeFeedItem(item, provider) {
     badge,
     listPrice,
     dealPrice,
-    coupon: String(item.coupon || "").trim(),
+    coupon: String(getFirstValue(item, ["coupon", "Coupon"]) || "").trim(),
     expiresOn: expires,
     affiliateUrl,
     imageUrl,
     note,
-    featured: Boolean(item.featured),
+    featured: Boolean(getFirstValue(item, ["featured", "Featured"])),
     createdAt: now,
     updatedAt: now,
     liveSource: provider
