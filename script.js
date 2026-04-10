@@ -1971,6 +1971,12 @@ async function init() {
     if (cloudOk && isAdminPage()) {
         showToast("Cloud connected. Sign in with Google to manage listings.", "success");
     }
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js").catch(() => {
+            // ignore service worker registration issues
+        });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
