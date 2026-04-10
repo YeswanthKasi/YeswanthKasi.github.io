@@ -51,6 +51,7 @@
                 <button class="admin-tab" data-tab="site" type="button">Site</button>
                 <button class="admin-tab" data-tab="ads" type="button">Ads</button>
                 <button class="admin-tab" data-tab="sponsorship" type="button">Sponsorship</button>
+                <button class="admin-tab" data-tab="live-data" type="button">Live Data</button>
                 <button class="admin-tab" data-tab="analytics" type="button">Analytics</button>
                 <button class="admin-tab" data-tab="backup" type="button">Backup</button>
             </div>
@@ -344,6 +345,37 @@
                     </label>
                     <div class="form-actions full">
                         <button class="btn btn-primary" type="submit">Save Sponsorship</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-panel" id="panel-live-data">
+                <h3>Live Data Sync</h3>
+                <p id="liveDataStatus">Configure a real product feed API and sync directly to Firestore.</p>
+                <form class="admin-form" id="liveDataForm">
+                    <label>
+                        Provider Name
+                        <input type="text" id="liveProviderInput" placeholder="Amazon Feed / Merchant API" required>
+                    </label>
+                    <label class="full">
+                        Feed URL
+                        <input type="url" id="liveFeedUrlInput" placeholder="https://api.your-partner.com/products" required>
+                    </label>
+                    <label>
+                        API Key (optional)
+                        <input type="text" id="liveApiKeyInput" placeholder="optional secret key for feed request">
+                    </label>
+                    <label>
+                        Item Limit
+                        <input type="number" id="liveItemLimitInput" min="1" max="500" value="100" required>
+                    </label>
+                    <label class="checkbox-field full">
+                        <input type="checkbox" id="liveEnabledInput">
+                        Enable scheduled sync (cloud scheduler)
+                    </label>
+                    <div class="form-actions full">
+                        <button class="btn btn-primary" type="submit">Save Live Data Config</button>
+                        <button class="btn btn-outline" id="syncNowBtn" type="button">Sync Now</button>
                     </div>
                 </form>
             </div>

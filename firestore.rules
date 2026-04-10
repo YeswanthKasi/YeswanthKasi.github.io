@@ -21,6 +21,10 @@ service cloud.firestore {
       allow read, update, delete: if isOwner();
     }
 
+    match /integrations/{docId} {
+      allow read, write: if isOwner();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

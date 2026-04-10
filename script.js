@@ -90,6 +90,16 @@ const defaultSettings = {
         cardBody: "Use this slot for high-ticket sponsorships, launches, and festival partner offers.",
         ctaText: "View Sponsorship",
         ctaUrl: "#contact"
+    },
+    liveData: {
+        enabled: false,
+        provider: "",
+        feedUrl: "",
+        apiKey: "",
+        itemLimit: 100,
+        lastSyncAt: 0,
+        lastSyncCount: 0,
+        lastSyncStatus: "never"
     }
 };
 
@@ -134,6 +144,10 @@ const cloud = {
     setPersistence: null,
     browserLocalPersistence: null,
     inMemoryPersistence: null,
+    getFunctions: null,
+    httpsCallable: null,
+    functions: null,
+    syncMerchantFeedCallable: null,
 
     getFirestore: null,
     doc: null,
@@ -228,6 +242,9 @@ const elements = {
     adsListingForm: document.getElementById("adsListingForm"),
     adsListingsTableBody: document.getElementById("adsListingsTableBody"),
     sponsorshipForm: document.getElementById("sponsorshipForm"),
+    liveDataForm: document.getElementById("liveDataForm"),
+    liveDataStatus: document.getElementById("liveDataStatus"),
+    syncNowBtn: document.getElementById("syncNowBtn"),
 
     exportDataBtn: document.getElementById("exportDataBtn"),
     importDataInput: document.getElementById("importDataInput"),
@@ -471,6 +488,10 @@ function normalizeSettings(raw) {
         sponsorship: {
             ...defaultSettings.sponsorship,
             ...(raw && raw.sponsorship ? raw.sponsorship : {})
+        },
+        liveData: {
+            ...defaultSettings.liveData,
+            ...(raw && raw.liveData ? raw.liveData : {})
         }
     };
 
@@ -538,6 +559,15 @@ function normalizeSettings(raw) {
     merged.sponsorship.cardBody = String(merged.sponsorship.cardBody || defaultSettings.sponsorship.cardBody).trim();
     merged.sponsorship.ctaText = String(merged.sponsorship.ctaText || defaultSettings.sponsorship.ctaText).trim();
     merged.sponsorship.ctaUrl = safeActionUrl(merged.sponsorship.ctaUrl) || defaultSettings.sponsorship.ctaUrl;
+
+    merged.liveData.enabled = Boolean(merged.liveData.enabled);
+    merged.liveData.provider = String(merged.liveData.provider || defaultSettings.liveData.provider).trim();
+    merged.liveData.feedUrl = safeExternalUrl(String(merged.liveData.feedUrl || "").trim());
+    merged.liveData.apiKey = String(merged.liveData.apiKey || "").trim();
+    merged.liveData.itemLimit = Math.min(Math.max(Number(merged.liveData.itemLimit) || 100, 1), 500);
+    merged.liveData.lastSyncAt = normalizeTimestamp(merged.liveData.lastSyncAt || 0);
+    merged.liveData.lastSyncCount = Number(merged.liveData.lastSyncCount) || 0;
+    merged.liveData.lastSyncStatus = String(merged.liveData.lastSyncStatus || "never");
 
     return merged;
 }
@@ -1016,6 +1046,18 @@ function loadAdminFormsFromState() {
         elements.sponsorshipForm.querySelector("#sponsorEnabledInput").checked = state.settings.sponsorship.enabled;
     }
 
+    if (elements.liveDataForm) {
+        elements.liveDataForm.querySelector("#liveProviderInput").value = state.settings.liveData.provider;
+        elements.liveDataForm.querySelector("#liveFeedUrlInput").value = state.settings.liveData.feedUrl;
+        elements.liveDataForm.querySelector("#liveApiKeyInput").value = state.settings.liveData.apiKey;
+        elements.liveDataForm.querySelector("#liveItemLimitInput").value = String(state.settings.liveData.itemLimit || 100);
+        elements.liveDataForm.querySelector("#liveEnabledInput").checked = state.settings.liveData.enabled;
+        if (elements.liveDataStatus) {
+            const last = state.settings.liveData.lastSyncAt ? formatDateTimeIST(state.settings.liveData.lastSyncAt) : "Never";
+            elements.liveDataStatus.textContent = `Status: ${state.settings.liveData.lastSyncStatus || "never"} | Last sync: ${last} | Count: ${state.settings.liveData.lastSyncCount || 0}`;
+        }
+    }
+
     if (elements.promoItemForm) {
         elements.promoItemForm.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -1209,11 +1251,13 @@ async function initializeCloudSecurity() {
         const [
             firebaseApp,
             firebaseAuth,
-            firebaseFirestore
+            firebaseFirestore,
+            firebaseFunctions
         ] = await Promise.all([
             import("https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js"),
             import("https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js"),
-            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js")
+            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js"),
+            import("https://www.gstatic.com/firebasejs/11.7.3/firebase-functions.js")
         ]);
 
         cloud.initializeApp = firebaseApp.initializeApp;
@@ -1228,6 +1272,8 @@ async function initializeCloudSecurity() {
         cloud.setPersistence = firebaseAuth.setPersistence;
         cloud.browserLocalPersistence = firebaseAuth.browserLocalPersistence;
         cloud.inMemoryPersistence = firebaseAuth.inMemoryPersistence;
+        cloud.getFunctions = firebaseFunctions.getFunctions;
+        cloud.httpsCallable = firebaseFunctions.httpsCallable;
 
         cloud.getFirestore = firebaseFirestore.getFirestore;
         cloud.doc = firebaseFirestore.doc;
@@ -1247,6 +1293,8 @@ async function initializeCloudSecurity() {
         cloud.app = cloud.initializeApp(firebaseConfig);
         cloud.auth = cloud.getAuth(cloud.app);
         cloud.db = cloud.getFirestore(cloud.app);
+        cloud.functions = cloud.getFunctions(cloud.app, "us-central1");
+        cloud.syncMerchantFeedCallable = cloud.httpsCallable(cloud.functions, "syncMerchantFeed");
 
         await cloud.setPersistence(cloud.auth, cloud.browserLocalPersistence);
 
@@ -1864,6 +1912,81 @@ function bindEvents() {
                 showToast("Sponsorship settings updated.", "success");
             } catch (error) {
                 showToast(readableCloudError(error, "Failed to update sponsorship settings."), "error");
+            }
+        });
+    }
+
+    if (elements.liveDataForm) {
+        elements.liveDataForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!state.ownerUnlocked || !state.cloudReady) {
+                showToast("Only authenticated owner can update live data config.", "error");
+                return;
+            }
+
+            const feedUrl = safeExternalUrl(elements.liveDataForm.querySelector("#liveFeedUrlInput").value.trim());
+            const provider = elements.liveDataForm.querySelector("#liveProviderInput").value.trim();
+            const apiKey = elements.liveDataForm.querySelector("#liveApiKeyInput").value.trim();
+            const itemLimit = Math.min(Math.max(Number(elements.liveDataForm.querySelector("#liveItemLimitInput").value) || 100, 1), 500);
+            const enabled = elements.liveDataForm.querySelector("#liveEnabledInput").checked;
+
+            if (!provider || !feedUrl) {
+                showToast("Provider and valid feed URL are required.", "error");
+                return;
+            }
+
+            state.settings.liveData = {
+                ...state.settings.liveData,
+                enabled,
+                provider,
+                feedUrl,
+                apiKey,
+                itemLimit
+            };
+
+            try {
+                await saveSettingsToCloud();
+                loadAdminFormsFromState();
+                showToast("Live data config saved.", "success");
+            } catch (error) {
+                showToast(readableCloudError(error, "Failed to save live data config."), "error");
+            }
+        });
+    }
+
+    if (elements.syncNowBtn) {
+        elements.syncNowBtn.addEventListener("click", async () => {
+            if (!state.ownerUnlocked || !state.cloudReady || !cloud.syncMerchantFeedCallable) {
+                showToast("Live sync callable is not ready.", "error");
+                return;
+            }
+
+            const cfg = state.settings.liveData;
+            if (!cfg.feedUrl || !cfg.provider) {
+                showToast("Save live data config first.", "error");
+                return;
+            }
+
+            try {
+                const result = await cloud.syncMerchantFeedCallable({
+                    provider: cfg.provider,
+                    feedUrl: cfg.feedUrl,
+                    apiKey: cfg.apiKey || "",
+                    itemLimit: cfg.itemLimit || 100
+                });
+
+                const count = Number(result?.data?.syncedCount) || 0;
+                state.settings.liveData.lastSyncAt = Date.now();
+                state.settings.liveData.lastSyncCount = count;
+                state.settings.liveData.lastSyncStatus = "success";
+                await saveSettingsToCloud();
+                loadAdminFormsFromState();
+                showToast(`Live sync completed. ${count} items updated.`, "success");
+            } catch (error) {
+                state.settings.liveData.lastSyncStatus = "failed";
+                await saveSettingsToCloud();
+                loadAdminFormsFromState();
+                showToast(readableCloudError(error, "Live sync failed."), "error");
             }
         });
     }
