@@ -450,6 +450,136 @@ function badgeLabel(value) {
     return map[value] || value;
 }
 
+function mapLiveCategory(raw) {
+    const value = String(raw || "").toLowerCase();
+    if (value.includes("fashion")) return "fashion";
+    if (value.includes("home") || value.includes("kitchen")) return "home";
+    if (value.includes("health") || value.includes("fitness")) return "health";
+    if (value.includes("beauty")) return "beauty";
+    if (value.includes("travel")) return "travel";
+    return "electronics";
+}
+
+function mapLiveBadge(raw) {
+    const value = String(raw || "").toLowerCase();
+    if (value.includes("hot")) return "hot";
+    if (value.includes("festival")) return "festival";
+    if (value.includes("drop") || value.includes("discount")) return "price-drop";
+    return "new";
+}
+
+function getFeedFirstValue(item, candidates) {
+    if (!item || typeof item !== "object") return "";
+    const keys = Object.keys(item);
+    for (const candidate of candidates) {
+        if (Object.prototype.hasOwnProperty.call(item, candidate) && item[candidate] != null && item[candidate] !== "") {
+            return item[candidate];
+        }
+        const normalizedCandidate = String(candidate).toLowerCase().replace(/[^a-z0-9]/g, "");
+        const matchedKey = keys.find((key) => String(key).toLowerCase().replace(/[^a-z0-9]/g, "") === normalizedCandidate);
+        if (matchedKey && item[matchedKey] != null && item[matchedKey] !== "") {
+            return item[matchedKey];
+        }
+    }
+    return "";
+}
+
+function parseFeedNumber(raw) {
+    if (typeof raw === "number") return Number.isFinite(raw) ? raw : NaN;
+    const normalized = String(raw || "").replace(/,/g, "").replace(/[^0-9.-]/g, "").trim();
+    const value = Number(normalized);
+    return Number.isFinite(value) ? value : NaN;
+}
+
+function parseFeedBoolean(raw) {
+    if (typeof raw === "boolean") return raw;
+    if (typeof raw === "number") return raw === 1;
+    const value = String(raw || "").trim().toLowerCase();
+    return ["1", "true", "yes", "y", "on"].includes(value);
+}
+
+function normalizeClientFeedItem(item, provider) {
+    const title = String(getFeedFirstValue(item, ["title", "name", "productTitle", "product_name", "Product Name"]) || "").trim();
+    const brand = String(getFeedFirstValue(item, ["brand", "store", "merchant", "Brand"]) || provider || "Partner").trim();
+    const dealPrice = parseFeedNumber(getFeedFirstValue(item, ["dealPrice", "price", "salePrice", "deal_price", "Deal Price", "Price"]) || 0);
+    const listPriceInput = parseFeedNumber(getFeedFirstValue(item, ["listPrice", "mrp", "originalPrice", "list_price", "List Price", "MRP"]) || 0);
+    const listPrice = listPriceInput > dealPrice ? listPriceInput : Math.round(dealPrice * 1.2);
+    const affiliateUrl = String(getFeedFirstValue(item, ["affiliateUrl", "url", "link", "affiliate_url", "URL", "Affiliate URL"]) || "").trim();
+    const imageUrl = String(getFeedFirstValue(item, ["imageUrl", "image", "thumbnail", "image_url", "Image URL"]) || "").trim();
+    const category = mapLiveCategory(getFeedFirstValue(item, ["category", "department", "Category"]) || "electronics");
+    const badge = mapLiveBadge(getFeedFirstValue(item, ["badge", "tag", "Badge"]) || "new");
+    const note = String(getFeedFirstValue(item, ["note", "description", "Note", "Description"]) || "Latest live synced offer").trim();
+
+    if (!title || !brand || !affiliateUrl) return null;
+    if (!Number.isFinite(dealPrice) || dealPrice <= 0) return null;
+
+    const now = Date.now();
+    const expires = new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const sourceId = String(getFeedFirstValue(item, ["id", "sku", "productId", "Product ID"]) || `${provider}-${title}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+        .slice(0, 100);
+
+    return normalizeProduct({
+        id: `live-${sourceId || now}`,
+        brand,
+        title,
+        category,
+        badge,
+        listPrice,
+        dealPrice,
+        coupon: String(getFeedFirstValue(item, ["coupon", "Coupon"]) || "").trim(),
+        expiresOn: expires,
+        affiliateUrl,
+        imageUrl,
+        note,
+        featured: parseFeedBoolean(getFeedFirstValue(item, ["featured", "Featured"])),
+        createdAt: now,
+        updatedAt: now
+    });
+}
+
+async function runClientSideLiveSync(config) {
+    if (!state.cloudReady || !cloud.db || !cloud.writeBatch || !cloud.collection || !cloud.doc) {
+        throw new Error("cloud-not-ready");
+    }
+
+    const response = await fetch(config.feedUrl, { headers: { accept: "application/json" } });
+    if (!response.ok) {
+        throw new Error(`feed-http-${response.status}`);
+    }
+
+    const data = await response.json();
+    const rawItems = Array.isArray(data)
+        ? data
+        : (Array.isArray(data.items) ? data.items : (Array.isArray(data.products) ? data.products : []));
+
+    const normalized = rawItems
+        .slice(0, config.itemLimit)
+        .map((item) => normalizeClientFeedItem(item, config.provider))
+        .filter(Boolean);
+
+    const batch = cloud.writeBatch(cloud.db);
+    normalized.forEach((item) => {
+        batch.set(cloud.doc(cloud.db, "products", item.id), item, { merge: true });
+    });
+
+    batch.set(cloud.doc(cloud.db, "site", "main"), {
+        liveData: {
+            provider: config.provider,
+            feedUrl: config.feedUrl,
+            itemLimit: config.itemLimit,
+            lastSyncAt: Date.now(),
+            lastSyncCount: normalized.length,
+            lastSyncStatus: "success"
+        }
+    }, { merge: true });
+
+    await batch.commit();
+    return normalized.length;
+}
+
 function normalizeProduct(raw) {
     if (!raw || typeof raw !== "object") return null;
 
@@ -1597,8 +1727,8 @@ function buildLiveDataConfigFromForm() {
 }
 
 async function runLiveSyncFromSettings() {
-    if (!state.ownerUnlocked || !state.cloudReady || !cloud.syncMerchantFeedCallable) {
-        showToast("Live sync callable is not ready.", "error");
+    if (!state.ownerUnlocked || !state.cloudReady) {
+        showToast("Live sync is not ready.", "error");
         return false;
     }
 
@@ -1609,14 +1739,20 @@ async function runLiveSyncFromSettings() {
     }
 
     try {
-        const result = await cloud.syncMerchantFeedCallable({
-            provider: cfg.provider,
-            feedUrl: cfg.feedUrl,
-            apiKey: cfg.apiKey || "",
-            itemLimit: cfg.itemLimit || 100
-        });
+        let count = 0;
 
-        const count = Number(result?.data?.syncedCount) || 0;
+        if (cloud.syncMerchantFeedCallable) {
+            const result = await cloud.syncMerchantFeedCallable({
+                provider: cfg.provider,
+                feedUrl: cfg.feedUrl,
+                apiKey: cfg.apiKey || "",
+                itemLimit: cfg.itemLimit || 100
+            });
+            count = Number(result?.data?.syncedCount) || 0;
+        } else {
+            count = await runClientSideLiveSync(cfg);
+        }
+
         state.settings.liveData.lastSyncAt = Date.now();
         state.settings.liveData.lastSyncCount = count;
         state.settings.liveData.lastSyncStatus = "success";
@@ -1625,6 +1761,21 @@ async function runLiveSyncFromSettings() {
         showToast(`Live sync completed. ${count} items updated.`, "success");
         return true;
     } catch (error) {
+        if (String(error?.message || "").includes("internal") || String(error?.message || "").includes("permission-denied")) {
+            try {
+                const fallbackCount = await runClientSideLiveSync(cfg);
+                state.settings.liveData.lastSyncAt = Date.now();
+                state.settings.liveData.lastSyncCount = fallbackCount;
+                state.settings.liveData.lastSyncStatus = "success";
+                await saveSettingsToCloud();
+                loadAdminFormsFromState();
+                showToast(`Live sync completed via direct mode. ${fallbackCount} items updated.`, "success");
+                return true;
+            } catch (_fallbackError) {
+                // Continue to default failure handler below.
+            }
+        }
+
         state.settings.liveData.lastSyncStatus = "failed";
         await saveSettingsToCloud();
         loadAdminFormsFromState();
